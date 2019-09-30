@@ -1,0 +1,36 @@
+{
+  "name": "easy-connection",
+  "version": "0.0.1",
+  "description": "Tiny lib for draw connection lines between two elements",
+  "main": "dist/index.ts",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "./node_modules/.bin/tsc --emitDeclarationOnly --outDir dist && rollup -c rollup.config.dev.js --watch",
+    "bundle": "rollup -c --environment INCLUDE_DEPS,BUILD:dev",
+    "tsc": "./node_modules/.bin/tsc --emitDeclarationOnly --outDir dist",
+    "build": "rm -rf ./dist && npm run tsc && npm run bundle",
+    "prettier": "prettier --write all \"src/**/*.ts\"",
+    "tslint": "tslint --project tsconfig.json",
+    "precommit": "npm run prettier && npm run tslint",
+    "test": "test"
+  },
+  "author": "ErikYu",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "7.3.4",
+    "@babel/preset-env": "7.3.4",
+    "@babel/preset-typescript": "7.3.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "prettier": "^1.18.2",
+    "rollup": "1.4.0",
+    "rollup-plugin-babel": "4.3.2",
+    "rollup-plugin-commonjs": "^9.2.1",
+    "rollup-plugin-css-only": "^1.0.0",
+    "rollup-plugin-livereload": "^1.0.3",
+    "rollup-plugin-serve": "^1.0.1",
+    "rollup-plugin-uglify": "6.0.2",
+    "tslint": "^5.20.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.6.3"
+  }
+}
