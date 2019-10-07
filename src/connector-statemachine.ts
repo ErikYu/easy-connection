@@ -84,60 +84,54 @@ export class ConnectorStateMachine extends ConnectorBase implements DrawPath, Dr
     let middleACoordinate;
     let middleBCoordinate;
     let endCoordinate;
-
-    const _leftTop = [this.options.pointerSize / 2, this.options.pointerSize / 2];
-    const _leftBottom = [this.options.pointerSize / 2, svgHeight - this.options.pointerSize / 2];
-    const _rightTop = [svgWidth - this.options.pointerSize, this.options.pointerSize / 2];
-    const _rightBottom = [svgWidth - this.options.pointerSize / 2, svgHeight - this.options.pointerSize / 2];
-
     switch (this.startPosition) {
       case StartPositionEnum.verticalLeftTop:
-        startCoordinate = _leftTop;
+        startCoordinate = this.svgParameters.leftTop;
         middleACoordinate = [this.options.pointerSize / 2, svgHeight / 2];
         middleBCoordinate = [svgWidth - this.options.pointerSize / 2, svgHeight / 2];
-        endCoordinate = _rightBottom;
+        endCoordinate = this.svgParameters.rightBottom;
         break;
       case StartPositionEnum.horizontalLeftTop:
-        startCoordinate = _leftTop;
+        startCoordinate = this.svgParameters.leftTop;
         middleACoordinate = [svgWidth / 2, this.options.pointerSize / 2];
         middleBCoordinate = [svgWidth / 2, svgHeight - this.options.pointerSize / 2];
-        endCoordinate = _rightBottom;
+        endCoordinate = this.svgParameters.rightBottom;
         break;
       case StartPositionEnum.verticalRightTop:
-        startCoordinate = _rightTop;
-        middleACoordinate = [svgWidth - this.options.pointerSize, svgHeight / 2];
-        middleBCoordinate = [this.options.pointerSize / 2, svgHeight / 2];
-        endCoordinate = _leftBottom;
-        break;
-      case StartPositionEnum.horizontalRightTop:
-        startCoordinate = _rightTop;
-        middleACoordinate = [svgWidth / 2, this.options.pointerSize / 2];
-        middleBCoordinate = [svgWidth / 2, svgHeight - this.options.pointerSize / 2];
-        endCoordinate = _leftBottom;
-        break;
-      case StartPositionEnum.verticalLeftBottom:
-        startCoordinate = _leftBottom;
-        middleACoordinate = [this.options.pointerSize / 2, svgHeight / 2];
-        middleBCoordinate = [svgWidth - this.options.pointerSize, svgHeight / 2];
-        endCoordinate = _rightTop;
-        break;
-      case StartPositionEnum.horizontalLeftBottom:
-        startCoordinate = _leftBottom;
-        middleACoordinate = [svgWidth / 2, svgHeight - this.options.pointerSize / 2];
-        middleBCoordinate = [svgWidth / 2, this.options.pointerSize / 2];
-        endCoordinate = _rightTop;
-        break;
-      case StartPositionEnum.verticalRightBottom:
-        startCoordinate = _rightBottom;
+        startCoordinate = this.svgParameters.rightTop;
         middleACoordinate = [svgWidth - this.options.pointerSize / 2, svgHeight / 2];
         middleBCoordinate = [this.options.pointerSize / 2, svgHeight / 2];
-        endCoordinate = _leftTop;
+        endCoordinate = this.svgParameters.leftBottom;
         break;
-      case StartPositionEnum.horizontalRightBottom:
-        startCoordinate = _rightBottom;
+      case StartPositionEnum.horizontalRightTop:
+        startCoordinate = this.svgParameters.rightTop;
+        middleACoordinate = [svgWidth / 2, this.options.pointerSize / 2];
+        middleBCoordinate = [svgWidth / 2, svgHeight - this.options.pointerSize / 2];
+        endCoordinate = this.svgParameters.leftBottom;
+        break;
+      case StartPositionEnum.verticalLeftBottom:
+        startCoordinate = this.svgParameters.leftBottom;
+        middleACoordinate = [this.options.pointerSize / 2, svgHeight / 2];
+        middleBCoordinate = [svgWidth - this.options.pointerSize / 2, svgHeight / 2];
+        endCoordinate = this.svgParameters.rightTop;
+        break;
+      case StartPositionEnum.horizontalLeftBottom:
+        startCoordinate = this.svgParameters.leftBottom;
         middleACoordinate = [svgWidth / 2, svgHeight - this.options.pointerSize / 2];
         middleBCoordinate = [svgWidth / 2, this.options.pointerSize / 2];
-        endCoordinate = _leftTop;
+        endCoordinate = this.svgParameters.rightTop;
+        break;
+      case StartPositionEnum.verticalRightBottom:
+        startCoordinate = this.svgParameters.rightBottom;
+        middleACoordinate = [svgWidth - this.options.pointerSize / 2, svgHeight / 2];
+        middleBCoordinate = [this.options.pointerSize / 2, svgHeight / 2];
+        endCoordinate = this.svgParameters.leftTop;
+        break;
+      case StartPositionEnum.horizontalRightBottom:
+        startCoordinate = this.svgParameters.rightBottom;
+        middleACoordinate = [svgWidth / 2, svgHeight - this.options.pointerSize / 2];
+        middleBCoordinate = [svgWidth / 2, this.options.pointerSize / 2];
+        endCoordinate = this.svgParameters.leftTop;
     }
 
     const path = createPolyline(this.options);

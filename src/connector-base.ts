@@ -237,7 +237,7 @@ export class ConnectorBase {
       width: svgWidth,
       leftTop: [this.options.pointerSize / 2, this.options.pointerSize / 2],
       leftBottom: [this.options.pointerSize / 2, svgHeight - this.options.pointerSize / 2],
-      rightTop: [svgWidth - this.options.pointerSize, this.options.pointerSize / 2],
+      rightTop: [svgWidth - this.options.pointerSize / 2, this.options.pointerSize / 2],
       rightBottom: [svgWidth - this.options.pointerSize / 2, svgHeight - this.options.pointerSize / 2],
     };
     return svgElement;
