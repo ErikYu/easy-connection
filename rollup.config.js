@@ -1,7 +1,7 @@
 import babel from 'rollup-plugin-babel';
 import { uglify } from "rollup-plugin-uglify";
 import commonjs from 'rollup-plugin-commonjs';
-import css from 'rollup-plugin-css-only';
+import scss from 'rollup-plugin-scss';
 
 const extensions = [
     '.js', '.jsx', '.ts', '.tsx',
@@ -17,7 +17,7 @@ module.exports = {
         exports: 'named',
     },
     plugins: [
-        css({ output: './dist/easy-connection.css' }),
+        scss({ output: './dist/easy-connection.css' }),
         babel({
             extensions,
             include: ['src/**/*'],
