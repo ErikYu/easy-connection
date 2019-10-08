@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dynamic Add</title>
+    <link rel="stylesheet" href="../dist/easy-connection.css">
+    <style>
+        #zone {
+            width: 1000px;
+            height: 700px;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+        .item {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #EB8C00;
+        }
+        #start1 {
+            left: 20px;
+            top: 30px;
+        }
+        #end1 {
+            left: 300px;
+            top: 200px;
+        }
+        #point3 {
+            left: 300px;
+            top: 20px;
+        }
+    </style>
+</head>
+<body>
+Double click the area and a new element will be created
+<div id="zone">
+    <div class="item" id="start1">s1</div>
+    <div class="item" id="end1">e1</div>
+    <div class="item" id="point3">p3</div>
+</div>
+
+<script src="../dist/index.js"></script>
+<script>
+  var zone = document.getElementById('zone');
+  var start1 = document.getElementById('start1');
+  var end1 = document.getElementById('end1');
+  var point3 = document.getElementById('point3');
+
+  var elements = [start1, end1, point3];
+  var connections = [
+    {start: start1, end: end1},
+  ];
+
+  var a = new EasyConnection.EasyConnection(zone, elements, connections, {
+    type: 'stateMachine',
+    color: '#ccc',
+    strokeWidth: 2,
+  });
+
+  zone.ondblclick = function(event) {
+    var newElem = document.createElement('div');
+    newElem.classList = ['item'];
+    newElem.style.left = event.offsetX+'px';
+    newElem.style.top = event.offsetY+'px';
+    a.addElement(newElem);
+  }
+</script>
+</body>
+</html>

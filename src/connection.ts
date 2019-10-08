@@ -68,6 +68,28 @@ export class EasyConnection {
 
   addElement(elem: HTMLElement): void {
     this.elementConnectionsMap[elem.id] = [];
+    this.playground.appendChild(elem);
+    this.connectableElements.push(
+      new Connectable(
+        this.playground,
+        elem,
+        {
+          ...this.options,
+          onDragging: () => {
+            // all lines connected to this element should be reRendered
+            this.elementConnectionsMap[elem.id].forEach(i => i.renderLine());
+          },
+        },
+        {
+          onCreatingLine: (targetElem: HTMLElement) => {
+            this.addConnection({
+              start: elem,
+              end: targetElem,
+            });
+          },
+        },
+      ),
+    );
   }
   addConnection(connection: DomConnection): void {
     const connectionInstance = new TYPE_MAP[this.options.type](

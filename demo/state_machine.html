@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="../../dist/easy-connection.css">
+    <title>State Machine</title>
+    <link rel="stylesheet" href="../dist/easy-connection.css">
     <style>
         #zone {
             width: 1000px;
@@ -59,38 +59,35 @@
     <div class="item" id="point6">p6</div>
     <div class="item" id="point7">p7</div>
 </div>
-
-<button id="btn1">ADD</button>
-
-<script src="../../dist/index.js"></script>
+<script src="../dist/index.js"></script>
 <script>
 
-    var zone = document.getElementById('zone');
-    var start1 = document.getElementById('start1');
-    var end1 = document.getElementById('end1');
-    var point3 = document.getElementById('point3');
-    var point4 = document.getElementById('point4');
-    var point5 = document.getElementById('point5');
-    var point6 = document.getElementById('point6');
-    var point7 = document.getElementById('point7');
+  var zone = document.getElementById('zone');
+  var start1 = document.getElementById('start1');
+  var end1 = document.getElementById('end1');
+  var point3 = document.getElementById('point3');
+  var point4 = document.getElementById('point4');
+  var point5 = document.getElementById('point5');
+  var point6 = document.getElementById('point6');
+  var point7 = document.getElementById('point7');
 
-    var elements = [start1, end1, point3, point4, point5, point6, point7];
-    var connections = [
-      {start: start1, end: end1},
-    ];
+  var elements = [start1, end1, point3, point4, point5, point6, point7];
+  var connections = [
+    {start: start1, end: end1},
+  ];
 
-    var a = new EasyConnection.EasyConnection(zone, elements, connections, {
-      type: 'stateMachine',
-      color: '#ccc',
-      strokeWidth: 2,
-    });
+  var a = new EasyConnection.EasyConnection(zone, elements, connections, {
+    type: 'stateMachine',
+    color: '#ccc',
+    strokeWidth: 2,
+  });
 
-    document.getElementById('btn1').onclick = function() {
-      a.addConnection({
-        start: point3,
-        end: end1,
-      })
-    }
+  document.getElementById('btn1').onclick = function() {
+    a.addConnection({
+      start: point3,
+      end: end1,
+    })
+  }
 </script>
 </body>
 </html>
