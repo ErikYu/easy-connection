@@ -2,7 +2,7 @@ import { ConnectorOptions, StartPositionEnum, DrawPath, DrawEndArrow } from './c
 import { ConnectorBase } from './connector-base';
 import { createPolyline, stateMachinePolyLine, createSvgElement } from './utils';
 
-export class ConnectorStateMachine extends ConnectorBase implements DrawPath, DrawEndArrow {
+export class ConnectorFlowchart extends ConnectorBase implements DrawPath, DrawEndArrow {
   constructor(playground: HTMLElement, startPoint: HTMLElement, endPoint: HTMLElement, options: ConnectorOptions) {
     super(playground, startPoint, endPoint, options);
   }

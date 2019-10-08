@@ -1,7 +1,7 @@
 import { DomConnection, EasyConnectionOptions } from './connector.model';
 import { ConnectorBase } from './connector-base';
 import { Connectable } from './connectable';
-import { ConnectorStateMachine } from './connector-statemachine';
+import { ConnectorFlowchart } from './connector-flowchart';
 import { ifOverlapping } from './utils';
 
 interface ElementConnectionsMap {
@@ -11,7 +11,7 @@ interface ElementConnectionsMap {
 const TYPE_MAP = {
   undefined: ConnectorBase,
   straight: ConnectorBase,
-  stateMachine: ConnectorStateMachine,
+  flowchart: ConnectorFlowchart,
 };
 
 export class EasyConnection {

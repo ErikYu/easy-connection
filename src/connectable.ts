@@ -2,13 +2,13 @@ import { Draggable } from './draggable';
 import { DragOptions } from './connector.model';
 import { prefixCls } from './constraints';
 import { ConnectorBase } from './connector-base';
-import { ConnectorStateMachine } from './connector-statemachine';
+import { ConnectorFlowchart } from './connector-flowchart';
 import { addClassIfNotExist, ifOverlapping } from './utils';
 
 const TYPE_MAP = {
   undefined: ConnectorBase,
   straight: ConnectorBase,
-  stateMachine: ConnectorStateMachine,
+  flowchart: ConnectorFlowchart,
 };
 
 export class Connectable extends Draggable {
