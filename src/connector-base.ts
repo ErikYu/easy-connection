@@ -32,7 +32,16 @@ export class ConnectorBase {
     this.playground.appendChild(this.svgElement);
   }
 
+  /**
+   * remove the whole svg part and the connect pointer
+   */
   public dispose() {
+    if (!!this.startPointer) {
+      this.startElement.removeChild(this.startPointer);
+    }
+    if (!!this.endPointer) {
+      this.endElement.removeChild(this.endPointer);
+    }
     this.playground.removeChild(this.svgElement);
   }
 
@@ -157,7 +166,7 @@ export class ConnectorBase {
         ((startPointer as unknown) as ConnectorPoint).position = 'top';
         ((endPointer as unknown) as ConnectorPoint).position = 'bottom';
         startPointer.style.left = `${startElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2}px`;
-        startPointer.style.top = `${this.options.pointerSize}px`;
+        startPointer.style.top = `-${this.options.pointerSize}px`;
         endPointer.style.left = `${endElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2}px`;
         endPointer.style.top = `${endElement.getBoundingClientRect().height}px`;
         break;
