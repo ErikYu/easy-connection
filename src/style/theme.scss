@@ -1,0 +1,9 @@
+// element hover
+@mixin element-hover {
+  box-shadow: 2px 2px 5px #333333;
+}
+
+@mixin element-target {
+  box-shadow: 2px 2px 5px #333333;
+  color: red;
+}

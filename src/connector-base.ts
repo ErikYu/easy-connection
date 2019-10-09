@@ -36,10 +36,10 @@ export class ConnectorBase {
    * remove the whole svg part and the connect pointer
    */
   public dispose() {
-    if (!!this.startPointer) {
+    if (this.startElement && this.startPointer) {
       this.startElement.removeChild(this.startPointer);
     }
-    if (!!this.endPointer) {
+    if (this.endElement && this.endPointer) {
       this.endElement.removeChild(this.endPointer);
     }
     this.playground.removeChild(this.svgElement);

@@ -1,4 +1,4 @@
-import './style/index.css';
+import './style/index.scss';
 
 export { EasyConnection } from './connection';
 export { ConnectorBase } from './connector-base';
