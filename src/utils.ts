@@ -52,7 +52,7 @@ export function num2px(numVal: number): string {
  * @param elem target html element
  * @param cls classNames or className
  */
-export function addClassIfNotExist(elem: HTMLElement, cls: string[] | string): void {
+export function addClassIfNotExist(elem: Element, cls: string[] | string): void {
   const classes = Array.isArray(cls) ? cls : [cls];
   for (const c of classes) {
     if (!elem.classList.contains(c)) {
@@ -61,6 +61,21 @@ export function addClassIfNotExist(elem: HTMLElement, cls: string[] | string): v
   }
 }
 
+export function removeClass(elem: Element | Element[], cls: string[] | string): void {
+  const classes = Array.isArray(cls) ? cls : [cls];
+  const elements = Array.isArray(elem) ? elem : [elem];
+  for (const e of elements) {
+    for (const c of classes) {
+      e.classList.remove(c);
+    }
+  }
+}
+
+/**
+ * Check if two HTML elements is Overlapping one by one
+ * @param elemA first element
+ * @param elemB second element
+ */
 export function ifOverlapping(elemA, elemB): boolean {
   const rect1 = elemA.getBoundingClientRect();
   const rect2 = elemB.getBoundingClientRect();
@@ -70,4 +85,10 @@ export function ifOverlapping(elemA, elemB): boolean {
     rect1.bottom < rect2.top ||
     rect1.top > rect2.bottom
   );
+}
+
+export function setStyle(elem: HTMLElement, style: Partial<CSSStyleDeclaration>) {
+  Object.keys(style).forEach(key => {
+    elem.style[key] = style[key];
+  });
 }

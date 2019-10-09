@@ -9,7 +9,7 @@
     "bundle": "rollup -c --environment INCLUDE_DEPS,BUILD:dev",
     "tsc": "./node_modules/.bin/tsc --emitDeclarationOnly --outDir dist",
     "build": "rm -rf ./dist && yarn run tsc && yarn run bundle",
-    "prettier": "prettier --write all \"src/**/*.ts\"",
+    "prettier": "prettier --write all \"src/**/*.ts\" \"src/**/*.scss\"" ,
     "tslint": "tslint --project tsconfig.json",
     "precommit": "yarn run prettier && yarn run tslint",
     "test": "test"

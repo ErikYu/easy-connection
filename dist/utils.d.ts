@@ -14,6 +14,13 @@ export declare function num2px(numVal: number): string;
  * @param elem target html element
  * @param cls classNames or className
  */
-export declare function addClassIfNotExist(elem: HTMLElement, cls: string[] | string): void;
+export declare function addClassIfNotExist(elem: Element, cls: string[] | string): void;
+export declare function removeClass(elem: Element | Element[], cls: string[] | string): void;
+/**
+ * Check if two HTML elements is Overlapping one by one
+ * @param elemA first element
+ * @param elemB second element
+ */
 export declare function ifOverlapping(elemA: any, elemB: any): boolean;
+export declare function setStyle(elem: HTMLElement, style: Partial<CSSStyleDeclaration>): void;
 export {};

@@ -28,6 +28,6 @@ module.exports = {
       extensions
     }),
     serve(['']),
-    livereload('dist'),
+    livereload('demo'),
   ],
 };

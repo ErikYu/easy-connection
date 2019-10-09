@@ -1,4 +1,17 @@
+@import 'theme';
 $prefixCls: 'cnt';
+
+.#{$prefixCls}-element {
+  cursor: move;
+  transition: box-shadow 0.1s linear;
+  &:hover {
+    @include element-hover;
+  }
+  &.cnt-will {
+    @include element-target;
+  }
+}
+
 .#{$prefixCls}-anchor {
-    cursor: pointer;
+  cursor: pointer;
 }
