@@ -29,7 +29,11 @@ export class EasyConnection {
     options: EasyConnectionOptions = { type: 'straight' },
   ) {
     this.playground = playground;
-    this.options = options;
+    this.options = {
+      color: '#cccccc',
+      hoverColor: 'red',
+      ...options,
+    };
     // set the playground to position relative
     // init the connections
     for (const elem of elements) {

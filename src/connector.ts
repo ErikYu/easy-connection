@@ -36,7 +36,12 @@ export abstract class Connector {
    * @param endElement end connector
    * @param options end connector
    */
-  protected constructor(playground: HTMLElement, startElement: HTMLElement, endElement: HTMLElement, options: ConnectorOptions) {
+  protected constructor(
+    playground: HTMLElement,
+    startElement: HTMLElement,
+    endElement: HTMLElement,
+    options: ConnectorOptions,
+  ) {
     this.options = {
       pointerSize: 4,
       strokeWidth: 1,
@@ -71,6 +76,8 @@ export abstract class Connector {
     const res = this.createConnectPoint(this.startElement, this.endElement);
     this.startPointer = res.start;
     this.endPointer = res.end;
+    addClassIfNotExist(this.startPointer, `${prefixCls}-pointer`);
+    addClassIfNotExist(this.endPointer, `${prefixCls}-pointer`);
     this.playground.removeChild(this.svgElement);
     this.svgElement = this.createSvgArea();
     this.drawPath();
@@ -197,14 +204,14 @@ export abstract class Connector {
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svgElement.innerHTML = `
     <defs>
-      <marker onclick="alert('You have clicked the circle.')" id="markerEndArrow" viewBox="0 0 30 30" refX="9" refY="3"  markerUnits="strokeWidth" markerWidth="30" markerHeight="30" orient="auto">
+      <marker id="markerEndArrow" viewBox="0 0 30 30" refX="9" refY="3"  markerUnits="strokeWidth" markerWidth="30" markerHeight="30" orient="auto">
         <path style="fill:${this.options.color};opacity:1" d="M0,0 0,6 9,3z" />
       </marker>
     </defs>`;
     // set svg position
     // use position attribute to handle with ethe position
     svgElement.style.position = 'absolute';
-    svgElement.style.zIndex = '1';
+    svgElement.style.zIndex = '999';
     svgElement.style.overflow = 'visible';
 
     const { offsetLeft: startOffsetLeft, offsetTop: startOffsetTop } = this.getTotalOffset(this.startPointer);

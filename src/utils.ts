@@ -5,6 +5,8 @@ interface IndexedObject {
 }
 
 interface PolylineEvents {
+  onmouseenter?: (event: MouseEvent) => void;
+  onmouseleave?: (event: MouseEvent) => void;
   onmousedown?: (event: MouseEvent) => void;
 }
 
@@ -20,14 +22,14 @@ export function createSvgElement(label: svgElement, styleMap: IndexedObject) {
 
 export function createPolyline(
   options: ConnectorOptions,
-  onclick?: (event: MouseEvent) => void,
-  { onmousedown }: PolylineEvents = {},
+  { onmouseenter, onmouseleave, onmousedown }: PolylineEvents,
 ): SVGPolylineElement {
   const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   polyline.setAttributeNS(null, 'fill', 'transparent');
   polyline.setAttributeNS(null, 'stroke', `${options.color}`);
   polyline.setAttributeNS(null, 'stroke-width', `${options.strokeWidth}`);
-  polyline.onclick = onclick;
+  polyline.onmouseenter = onmouseenter;
+  polyline.onmouseleave = onmouseleave;
   polyline.onmousedown = onmousedown;
   return polyline;
 }
