@@ -267,4 +267,31 @@ export abstract class Connector {
       offsetTop,
     };
   }
+
+  // Functions that can be inherited or override
+  // Used for the children classes, ep: ConnectorBase, ConnectorFlowchart...
+
+  /**
+   * When mouse move into the connection, the hover color shall be changed
+   * @param event: MouseEvent
+   */
+  onmouseenter = (event: MouseEvent) => {
+    const polyline = event.target as HTMLElement;
+    const hoverColor = this.options.hoverColor || this.options.color;
+    polyline.style.stroke = hoverColor;
+    this.svgElement.getElementById('markerEndArrow').getElementsByTagName('path')[0].style.fill = hoverColor;
+  // tslint:disable-next-line: Unnecessary semicolon
+  };
+
+  /**
+   * When mouse move leave the connection, the hover color shall be changed
+   * @param event: MouseEvent
+   */
+  onmouseleave = (event: MouseEvent) => {
+    (event.target as HTMLElement).style.stroke = this.options.color;
+    this.svgElement
+      .getElementById('markerEndArrow')
+      .getElementsByTagName('path')[0].style.fill = this.options.color;
+  // tslint:disable-next-line: Unnecessary semicolon
+  };
 }

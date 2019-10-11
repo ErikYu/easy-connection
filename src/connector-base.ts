@@ -104,18 +104,8 @@ export class ConnectorBase extends Connector {
           };
         }
       },
-      onmouseenter: (event: MouseEvent) => {
-        const polyline = event.target as HTMLElement;
-        const hoverColor = this.options.hoverColor || this.options.color;
-        polyline.style.stroke = hoverColor;
-        this.svgElement.getElementById('markerEndArrow').getElementsByTagName('path')[0].style.fill = hoverColor;
-      },
-      onmouseleave: (event: MouseEvent) => {
-        (event.target as HTMLElement).style.stroke = this.options.color;
-        this.svgElement
-          .getElementById('markerEndArrow')
-          .getElementsByTagName('path')[0].style.fill = this.options.color;
-      },
+      onmouseenter: this.onmouseenter,
+      onmouseleave: this.onmouseleave,
     });
     straightPolyline(path, startCoordinate, endCoordinate);
     path.style.markerEnd = 'url(#markerEndArrow)';
@@ -123,19 +113,6 @@ export class ConnectorBase extends Connector {
   }
 
   // onMouseDownPolyline = ;
-
-  // TODO
-  onClickPolyline = (event: MouseEvent) => {
-    console.log('click~~~~~~~~~~~~~~');
-    const isOnArrow = this.checkIfMouseEventOnArrow(event);
-    if (isOnArrow) {
-      // for events on arrow
-    } else {
-      // for events on line/polyline
-    }
-
-    // tslint:disable-next-line: Unnecessary semicolon
-  };
 
   private checkIfMouseEventOnArrow(event: MouseEvent): boolean {
     const isNear = (a, b) => Math.abs(a - b) < 50;

@@ -25,7 +25,7 @@ export function createPolyline(
   { onmouseenter, onmouseleave, onmousedown }: PolylineEvents,
 ): SVGPolylineElement {
   const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-  polyline.setAttributeNS(null, 'fill', 'transparent');
+  polyline.setAttributeNS(null, 'fill', 'none');
   polyline.setAttributeNS(null, 'stroke', `${options.color}`);
   polyline.setAttributeNS(null, 'stroke-width', `${options.strokeWidth}`);
   polyline.onmouseenter = onmouseenter;

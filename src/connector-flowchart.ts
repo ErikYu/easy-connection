@@ -65,7 +65,10 @@ export class ConnectorFlowchart extends Connector implements DrawPath {
         endCoordinate = this.svgParameters.leftTop;
     }
 
-    const path = createPolyline(this.options, {});
+    const path = createPolyline(this.options, {
+      onmouseenter: this.onmouseenter,
+      onmouseleave: this.onmouseleave,
+    });
     stateMachinePolyLine(path, startCoordinate, middleACoordinate, middleBCoordinate, endCoordinate);
     path.style.markerEnd = 'url(#markerEndArrow)';
     this.svgElement.appendChild(path);
