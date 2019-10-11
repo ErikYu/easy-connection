@@ -6,7 +6,6 @@ interface Coordinate {
 export declare class Draggable {
     elem: HTMLElement;
     isDragging: boolean;
-    isCreatingNewConnector: boolean;
     dragOptions: DragOptions;
     startCoordinate: Coordinate;
     elemStartCoordinate: Coordinate;

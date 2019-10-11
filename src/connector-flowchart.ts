@@ -1,6 +1,5 @@
-import { ConnectorOptions, StartPositionEnum, DrawPath, DrawEndArrow } from './connector.model';
-import { ConnectorBase } from './connector-base';
-import { createPolyline, stateMachinePolyLine, createSvgElement } from './utils';
+import { ConnectorOptions, StartPositionEnum, DrawPath } from './connector.model';
+import { createPolyline, stateMachinePolyLine } from './utils';
 import { Connector } from './connector';
 
 export class ConnectorFlowchart extends Connector implements DrawPath {
@@ -68,6 +67,7 @@ export class ConnectorFlowchart extends Connector implements DrawPath {
     const path = createPolyline(this.options, {
       onmouseenter: this.onmouseenter,
       onmouseleave: this.onmouseleave,
+      onmousedown: this.onmousedown,
     });
     stateMachinePolyLine(path, startCoordinate, middleACoordinate, middleBCoordinate, endCoordinate);
     path.style.markerEnd = 'url(#markerEndArrow)';

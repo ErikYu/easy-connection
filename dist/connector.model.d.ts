@@ -5,6 +5,7 @@ export interface ConnectorOptions {
     pointerSize?: number;
     strokeWidth?: number;
     color?: string;
+    hoverColor?: string;
     arrowSize?: number;
 }
 export interface EasyConnectionOptions extends ConnectorOptions {

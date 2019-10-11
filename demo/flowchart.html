@@ -78,16 +78,10 @@
 
   var a = new EasyConnection.EasyConnection(zone, elements, connections, {
     type: 'flowchart',
-    color: '#ccc',
     strokeWidth: 2,
+    color: '#ccc',
+    hoverColor: 'red',
   });
-
-  document.getElementById('btn1').onclick = function() {
-    a.addConnection({
-      start: point3,
-      end: end1,
-    })
-  }
 </script>
 </body>
 </html>

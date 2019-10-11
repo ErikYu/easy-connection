@@ -1,5 +1,5 @@
 import { ConnectorOptions, StartPositionEnum, SvgCanvasParameters } from './connector.model';
-import { addClassIfNotExist } from './utils';
+import { addClassIfNotExist, removeClass, setStyle } from './utils';
 import { prefixCls } from './constraints';
 import { ConnectorPoint } from './connector-point';
 
@@ -29,6 +29,9 @@ export abstract class Connector {
   // the svg container, each connector has one svg
   svgElement: SVGSVGElement;
   svgParameters: SvgCanvasParameters;
+
+  isMoving = false;
+  helperPointer: HTMLElement;
 
   /**
    * @param playground start connector
@@ -268,6 +271,17 @@ export abstract class Connector {
     };
   }
 
+  private checkIfMouseEventOnArrow(event: MouseEvent): boolean {
+    const isNear = (a, b) => Math.abs(a - b) < 50;
+    const { offsetX, offsetY } = event;
+    const mapping = {
+      [StartPositionEnum.horizontalLeftTop]: 'rightBottom',
+      [StartPositionEnum.verticalLeftTop]: 'rightBottom',
+    };
+    const [arrowX, arrowY] = this.svgParameters[mapping[this.startPosition]];
+    return isNear(offsetX, arrowX) && isNear(offsetY, arrowY);
+  }
+
   // Functions that can be inherited or override
   // Used for the children classes, ep: ConnectorBase, ConnectorFlowchart...
 
@@ -280,7 +294,7 @@ export abstract class Connector {
     const hoverColor = this.options.hoverColor || this.options.color;
     polyline.style.stroke = hoverColor;
     this.svgElement.getElementById('markerEndArrow').getElementsByTagName('path')[0].style.fill = hoverColor;
-  // tslint:disable-next-line: Unnecessary semicolon
+    // tslint:disable-next-line: Unnecessary semicolon
   };
 
   /**
@@ -289,9 +303,75 @@ export abstract class Connector {
    */
   onmouseleave = (event: MouseEvent) => {
     (event.target as HTMLElement).style.stroke = this.options.color;
-    this.svgElement
-      .getElementById('markerEndArrow')
-      .getElementsByTagName('path')[0].style.fill = this.options.color;
-  // tslint:disable-next-line: Unnecessary semicolon
+    this.svgElement.getElementById('markerEndArrow').getElementsByTagName('path')[0].style.fill = this.options.color;
+    // tslint:disable-next-line: Unnecessary semicolon
+  };
+
+  /**
+   * While mousedown on then endArrow, the connection should start moving
+   * We can modify the connection to other elements or just destroy the element
+   * @param event: MouseEvent
+   */
+  onmousedown = (event: MouseEvent) => {
+    const isOnArrow = this.checkIfMouseEventOnArrow(event);
+    console.log(isOnArrow);
+    if (isOnArrow) {
+      // this connection should be removed and temp lines should be created
+      // build a helper pointer and connect it with the helper point
+      this.isMoving = true;
+      const helperPointOffset = 3;
+      const x: number = event.pageX - this.playground.offsetLeft;
+      const y: number = event.pageY - this.playground.offsetTop;
+      this.helperPointer = document.createElement('div');
+      setStyle(this.helperPointer, {
+        width: '0px',
+        height: '0px',
+        position: 'absolute',
+        left: `${x - helperPointOffset}px`,
+        top: `${y - helperPointOffset}px`,
+      });
+      this.playground.appendChild(this.helperPointer);
+      this.endElement = this.helperPointer;
+      this.endPointer = undefined;
+      // reconnect
+      document.onmousemove = (_event: MouseEvent) => {
+        if (this.isMoving) {
+          this.helperPointer.style.left = `${_event.pageX - this.playground.offsetLeft - helperPointOffset}px`;
+          this.helperPointer.style.top = `${_event.pageY - this.playground.offsetTop - helperPointOffset}px`;
+          this.renderLine();
+          const elementMouseIsOver = document.elementsFromPoint(_event.clientX, _event.clientY);
+          const targetElements = elementMouseIsOver.filter(i => i.classList.contains('cnt-element'));
+
+          const allElements = this.playground.getElementsByClassName(`${prefixCls}-element`);
+          if (targetElements.length > 0) {
+            addClassIfNotExist(targetElements[0], `${prefixCls}-will`);
+            // others should be deleted
+            removeClass(Array.from(allElements).filter(i => i !== targetElements[0]), `${prefixCls}-will`);
+          } else {
+            removeClass(Array.from(allElements), `${prefixCls}-will`);
+          }
+        }
+      };
+
+      // TODO: many optimize
+      document.onmouseup = (_upEvent: MouseEvent) => {
+        this.isMoving = false;
+        const elementMouseIsOver = document.elementsFromPoint(_upEvent.clientX, _upEvent.clientY);
+        const targetElements = elementMouseIsOver.filter(i => i.classList.contains('cnt-element'));
+        if (targetElements.length > 0) {
+          this.endElement = targetElements[0] as HTMLElement;
+          this.endPointer = undefined;
+          this.renderLine();
+          removeClass(targetElements[0], `${prefixCls}-will`);
+        } else {
+          this.dispose();
+        }
+        if (this.helperPointer) {
+          this.playground.removeChild(this.helperPointer);
+          this.helperPointer = undefined;
+        }
+      };
+    }
+    // tslint:disable-next-line: Unnecessary semicolon
   };
 }
