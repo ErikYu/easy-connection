@@ -4,6 +4,7 @@ export declare class Connectable extends Draggable {
     playground: HTMLElement;
     nativeElement: HTMLElement;
     helperPointer: HTMLElement;
+    isCreatingNewConnector: boolean;
     onCreatingLine: any;
     constructor(playground: HTMLElement, elem: HTMLElement, dragOptions: DragOptions, { onCreatingLine }: {
         onCreatingLine: any;

@@ -3,6 +3,13 @@ import { ConnectorOptions } from './connector.model';
 interface IndexedObject {
   [a: string]: string;
 }
+
+interface PolylineEvents {
+  onmouseenter?: (event: MouseEvent) => void;
+  onmouseleave?: (event: MouseEvent) => void;
+  onmousedown?: (event: MouseEvent) => void;
+}
+
 type svgElement = 'path' | 'polyline';
 
 export function createSvgElement(label: svgElement, styleMap: IndexedObject) {
@@ -13,11 +20,17 @@ export function createSvgElement(label: svgElement, styleMap: IndexedObject) {
   return elem;
 }
 
-export function createPolyline(options: ConnectorOptions): SVGPolylineElement {
+export function createPolyline(
+  options: ConnectorOptions,
+  { onmouseenter, onmouseleave, onmousedown }: PolylineEvents,
+): SVGPolylineElement {
   const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   polyline.setAttributeNS(null, 'fill', 'none');
   polyline.setAttributeNS(null, 'stroke', `${options.color}`);
   polyline.setAttributeNS(null, 'stroke-width', `${options.strokeWidth}`);
+  polyline.onmouseenter = onmouseenter;
+  polyline.onmouseleave = onmouseleave;
+  polyline.onmousedown = onmousedown;
   return polyline;
 }
 

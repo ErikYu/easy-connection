@@ -1,80 +1,10 @@
-import { ConnectorOptions, StartPositionEnum, DrawPath, DrawEndArrow } from './connector.model';
-import { ConnectorBase } from './connector-base';
-import { createPolyline, stateMachinePolyLine, createSvgElement } from './utils';
+import { ConnectorOptions, StartPositionEnum, DrawPath } from './connector.model';
+import { createPolyline, stateMachinePolyLine } from './utils';
+import { Connector } from './connector';
 
-export class ConnectorFlowchart extends ConnectorBase implements DrawPath, DrawEndArrow {
+export class ConnectorFlowchart extends Connector implements DrawPath {
   constructor(playground: HTMLElement, startPoint: HTMLElement, endPoint: HTMLElement, options: ConnectorOptions) {
     super(playground, startPoint, endPoint, options);
-  }
-
-  drawEndArrow() {
-    // half of the arrow's deg, described in radius value
-    const arrowDeg = (45 / 360) * Math.PI;
-
-    const { leftTop, leftBottom, rightTop, rightBottom } = this.svgParameters;
-    const { arrowSize, color } = this.options;
-
-    const arrowPath = createSvgElement('path', {
-      fill: color,
-    });
-    const verticalHandler = (positionValue, factor: 1 | -1) => {
-      arrowPath.setAttributeNS(
-        null,
-        'd',
-        `
-          M${positionValue[0]} ${positionValue[1]}
-          L${positionValue[0] + factor * arrowSize * Math.sin(arrowDeg)}
-           ${positionValue[1] - factor * arrowSize * Math.cos(arrowDeg)}
-          L${positionValue[0]} ${positionValue[1] - factor * arrowSize * 0.6}
-          L${positionValue[0] - factor * arrowSize * Math.sin(arrowDeg)}
-           ${positionValue[1] - factor * arrowSize * Math.cos(arrowDeg)}
-          Z
-        `,
-      );
-    };
-    const horizontalHandler = (positionValue, factor: 1 | -1) => {
-      arrowPath.setAttributeNS(
-        null,
-        'd',
-        `
-          M${positionValue[0]} ${positionValue[1]}
-          L${positionValue[0] - factor * arrowSize * Math.cos(arrowDeg)} ${positionValue[1] +
-          factor * arrowSize * Math.sin(arrowDeg)}
-          L${positionValue[0] - factor * arrowSize * 0.6} ${positionValue[1]}
-          L${positionValue[0] - factor * arrowSize * Math.cos(arrowDeg)} ${positionValue[1] -
-          factor * arrowSize * Math.sin(arrowDeg)}
-          Z
-        `,
-      );
-    };
-
-    switch (this.startPosition) {
-      case StartPositionEnum.verticalLeftTop:
-        verticalHandler(rightBottom, 1);
-        break;
-      case StartPositionEnum.horizontalLeftTop:
-        horizontalHandler(rightBottom, 1);
-        break;
-      case StartPositionEnum.verticalRightTop:
-        verticalHandler(leftBottom, 1);
-        break;
-      case StartPositionEnum.horizontalRightTop:
-        horizontalHandler(leftBottom, -1);
-        break;
-      case StartPositionEnum.verticalLeftBottom:
-        verticalHandler(rightTop, -1);
-        break;
-      case StartPositionEnum.horizontalLeftBottom:
-        horizontalHandler(rightTop, 1);
-        break;
-      case StartPositionEnum.verticalRightBottom:
-        verticalHandler(leftTop, -1);
-        break;
-      case StartPositionEnum.horizontalRightBottom:
-        horizontalHandler(leftTop, -1);
-        break;
-    }
-    this.svgElement.appendChild(arrowPath);
   }
 
   drawPath() {
@@ -134,8 +64,13 @@ export class ConnectorFlowchart extends ConnectorBase implements DrawPath, DrawE
         endCoordinate = this.svgParameters.leftTop;
     }
 
-    const path = createPolyline(this.options);
+    const path = createPolyline(this.options, {
+      onmouseenter: this.onmouseenter,
+      onmouseleave: this.onmouseleave,
+      onmousedown: this.onmousedown,
+    });
     stateMachinePolyLine(path, startCoordinate, middleACoordinate, middleBCoordinate, endCoordinate);
+    path.style.markerEnd = 'url(#markerEndArrow)';
     this.svgElement.appendChild(path);
   }
 }

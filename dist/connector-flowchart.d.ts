@@ -1,7 +1,6 @@
-import { ConnectorOptions, DrawPath, DrawEndArrow } from './connector.model';
-import { ConnectorBase } from './connector-base';
-export declare class ConnectorFlowchart extends ConnectorBase implements DrawPath, DrawEndArrow {
+import { ConnectorOptions, DrawPath } from './connector.model';
+import { Connector } from './connector';
+export declare class ConnectorFlowchart extends Connector implements DrawPath {
     constructor(playground: HTMLElement, startPoint: HTMLElement, endPoint: HTMLElement, options: ConnectorOptions);
-    drawEndArrow(): void;
     drawPath(): void;
 }

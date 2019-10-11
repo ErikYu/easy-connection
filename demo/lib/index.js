@@ -124,6 +124,48 @@
     return _assertThisInitialized(self);
   }
 
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+  }
+
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
+  function _iterableToArrayLimit(arr, i) {
+    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+      return;
+    }
+
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+  }
+
   var StartPositionEnum;
 
   (function (StartPositionEnum) {
@@ -137,20 +179,17 @@
     StartPositionEnum[StartPositionEnum["verticalRightBottom"] = 7] = "verticalRightBottom";
   })(StartPositionEnum || (StartPositionEnum = {}));
 
-  var prefixCls = 'cnt';
-
-  function createSvgElement(label, styleMap) {
-    var elem = document.createElementNS('http://www.w3.org/2000/svg', label);
-    Object.keys(styleMap).forEach(function (key) {
-      elem.setAttributeNS(null, key, styleMap[key]);
-    });
-    return elem;
-  }
-  function createPolyline(options) {
+  function createPolyline(options, _ref) {
+    var onmouseenter = _ref.onmouseenter,
+        onmouseleave = _ref.onmouseleave,
+        onmousedown = _ref.onmousedown;
     var polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    polyline.setAttributeNS(null, 'fill', 'transparent');
+    polyline.setAttributeNS(null, 'fill', 'none');
     polyline.setAttributeNS(null, 'stroke', "".concat(options.color));
     polyline.setAttributeNS(null, 'stroke-width', "".concat(options.strokeWidth));
+    polyline.onmouseenter = onmouseenter;
+    polyline.onmouseleave = onmouseleave;
+    polyline.onmousedown = onmousedown;
     return polyline;
   }
   function straightPolyline(polyLine, start, end) {
@@ -255,55 +294,127 @@
     });
   }
 
-  var ConnectorBase =
+  var prefixCls = 'cnt';
+
+  /**
+   * The root class of connection
+   */
+  var Connector =
   /*#__PURE__*/
   function () {
-    _createClass(ConnectorBase, [{
-      key: "renderLine",
-      // svg container parameters
+    // The container of the zone, every thing is on it
+    // The start HTMLElement of the connection
+    // The end HTMLElement of the connection
+    // The element that attached on the start/end element
+    // usually, there will be 4 most on each element, one at each side
+    // describes where the start element is related to the end element
+    // the svg container, each connector has one svg
 
-      /**
-       * Remove and render the svg part
-       * TODO: more efficient way should be used here
-       */
-      value: function renderLine() {
-        var res = this.createConnectPoint(this.startElement, this.endElement);
-        this.startPointer = res.start;
-        this.endPointer = res.end;
-        this.playground.removeChild(this.svgElement);
-        this.svgElement = this.createSvgArea();
-        this.drawEndArrow();
-        this.drawPath();
-        this.playground.appendChild(this.svgElement);
-      }
-      /**
-       * remove the whole svg part and the connect pointer
-       */
+    /**
+     * @param playground start connector
+     * @param startElement start connector
+     * @param endElement end connector
+     * @param options end connector
+     */
+    function Connector(playground, startElement, endElement, options) {
+      var _this = this;
 
-    }, {
-      key: "dispose",
-      value: function dispose() {
-        if (this.startElement && this.startPointer) {
-          this.startElement.removeChild(this.startPointer);
-        }
+      _classCallCheck(this, Connector);
 
-        if (this.endElement && this.endPointer) {
-          this.endElement.removeChild(this.endPointer);
-        }
+      this.isMoving = false;
 
-        this.playground.removeChild(this.svgElement);
-      }
-      /**
-       * @param playground start connector
-       * @param startElement start connector
-       * @param endElement end connector
-       * @param options end connector
-       */
+      this.onmouseenter = function (event) {
+        var polyline = event.target;
+        var hoverColor = _this.options.hoverColor || _this.options.color;
+        polyline.style.stroke = hoverColor;
+        _this.svgElement.getElementById('markerEndArrow').getElementsByTagName('path')[0].style.fill = hoverColor; // tslint:disable-next-line: Unnecessary semicolon
+      };
 
-    }]);
+      this.onmouseleave = function (event) {
+        event.target.style.stroke = _this.options.color;
+        _this.svgElement.getElementById('markerEndArrow').getElementsByTagName('path')[0].style.fill = _this.options.color; // tslint:disable-next-line: Unnecessary semicolon
+      };
 
-    function ConnectorBase(playground, startElement, endElement, options) {
-      _classCallCheck(this, ConnectorBase);
+      this.onmousedown = function (event) {
+        var isOnArrow = _this.checkIfMouseEventOnArrow(event);
+
+        console.log(isOnArrow);
+
+        if (isOnArrow) {
+          // this connection should be removed and temp lines should be created
+          // build a helper pointer and connect it with the helper point
+          _this.isMoving = true;
+          var helperPointOffset = 3;
+          var x = event.pageX - _this.playground.offsetLeft;
+          var y = event.pageY - _this.playground.offsetTop;
+          _this.helperPointer = document.createElement('div');
+          setStyle(_this.helperPointer, {
+            width: '0px',
+            height: '0px',
+            position: 'absolute',
+            left: "".concat(x - helperPointOffset, "px"),
+            top: "".concat(y - helperPointOffset, "px")
+          });
+
+          _this.playground.appendChild(_this.helperPointer);
+
+          _this.endElement = _this.helperPointer;
+          _this.endPointer = undefined; // reconnect
+
+          document.onmousemove = function (_event) {
+            if (_this.isMoving) {
+              _this.helperPointer.style.left = "".concat(_event.pageX - _this.playground.offsetLeft - helperPointOffset, "px");
+              _this.helperPointer.style.top = "".concat(_event.pageY - _this.playground.offsetTop - helperPointOffset, "px");
+
+              _this.renderLine();
+
+              var elementMouseIsOver = document.elementsFromPoint(_event.clientX, _event.clientY);
+              var targetElements = elementMouseIsOver.filter(function (i) {
+                return i.classList.contains('cnt-element');
+              });
+
+              var allElements = _this.playground.getElementsByClassName("".concat(prefixCls, "-element"));
+
+              if (targetElements.length > 0) {
+                addClassIfNotExist(targetElements[0], "".concat(prefixCls, "-will")); // others should be deleted
+
+                removeClass(Array.from(allElements).filter(function (i) {
+                  return i !== targetElements[0];
+                }), "".concat(prefixCls, "-will"));
+              } else {
+                removeClass(Array.from(allElements), "".concat(prefixCls, "-will"));
+              }
+            }
+          }; // TODO: many optimize
+
+
+          document.onmouseup = function (_upEvent) {
+            _this.isMoving = false;
+            var elementMouseIsOver = document.elementsFromPoint(_upEvent.clientX, _upEvent.clientY);
+            var targetElements = elementMouseIsOver.filter(function (i) {
+              return i.classList.contains('cnt-element');
+            });
+
+            if (targetElements.length > 0) {
+              _this.endElement = targetElements[0];
+              _this.endPointer = undefined;
+
+              _this.renderLine();
+
+              removeClass(targetElements[0], "".concat(prefixCls, "-will"));
+            } else {
+              _this.dispose();
+            }
+
+            if (_this.helperPointer) {
+              _this.playground.removeChild(_this.helperPointer);
+
+              _this.helperPointer = undefined;
+            }
+          };
+        } // tslint:disable-next-line: Unnecessary semicolon
+
+      };
 
       this.options = _objectSpread2({
         pointerSize: 4,
@@ -324,12 +435,46 @@
       addClassIfNotExist(this.endPointer, "".concat(prefixCls, "-pointer")); // create a svg area between start and end
 
       this.svgElement = this.createSvgArea();
-      this.drawEndArrow();
       this.drawPath();
       this.playground.appendChild(this.svgElement);
     }
+    /**
+     * Remove and render the svg part
+     * TODO: more efficient way should be used here
+     */
 
-    _createClass(ConnectorBase, [{
+
+    _createClass(Connector, [{
+      key: "renderLine",
+      value: function renderLine() {
+        var res = this.createConnectPoint(this.startElement, this.endElement);
+        this.startPointer = res.start;
+        this.endPointer = res.end;
+        addClassIfNotExist(this.startPointer, "".concat(prefixCls, "-pointer"));
+        addClassIfNotExist(this.endPointer, "".concat(prefixCls, "-pointer"));
+        this.playground.removeChild(this.svgElement);
+        this.svgElement = this.createSvgArea();
+        this.drawPath();
+        this.playground.appendChild(this.svgElement);
+      }
+      /**
+       * remove the whole svg part and the connect pointer
+       */
+
+    }, {
+      key: "dispose",
+      value: function dispose() {
+        if (this.startElement && this.startPointer) {
+          this.startElement.removeChild(this.startPointer);
+        }
+
+        if (this.endElement && this.endPointer) {
+          this.endElement.removeChild(this.endPointer);
+        }
+
+        this.playground.removeChild(this.svgElement);
+      }
+    }, {
       key: "createConnectPoint",
       value: function createConnectPoint(startElement, endElement) {
         if (!!this.startPointer) {
@@ -338,11 +483,8 @@
 
         if (!!this.endPointer) {
           endElement.removeChild(this.endPointer);
-        } // TBD
-        // calc the absolute distance between two elements
+        } // calc the absolute distance between two elements
         // should notice that the area depends on the endElement position related to the start element
-        // if width >>> height, use horizontal mode
-        // if height >>> width, use vertical mode
 
 
         var startPointer = document.createElement('div');
@@ -433,16 +575,6 @@
           end: endPointer
         };
       }
-    }, {
-      key: "getTotalOffset",
-      value: function getTotalOffset(pointer) {
-        var offsetLeft = pointer.offsetLeft + pointer.offsetParent.offsetLeft;
-        var offsetTop = pointer.offsetTop + pointer.offsetParent.offsetTop;
-        return {
-          offsetLeft: offsetLeft,
-          offsetTop: offsetTop
-        };
-      }
       /**
        * Create a svg area used for the connection line between the start and end point
        * the area is rect
@@ -456,7 +588,7 @@
         // use position attribute to handle with ethe position
 
         svgElement.style.position = 'absolute';
-        svgElement.style.zIndex = '-999';
+        svgElement.style.zIndex = '999';
         svgElement.style.overflow = 'visible';
 
         var _this$getTotalOffset = this.getTotalOffset(this.startPointer),
@@ -509,16 +641,64 @@
         };
         return svgElement;
       }
-      /**
-       * draw a arrow in the end point position
-       */
-
     }, {
-      key: "drawEndArrow",
-      value: function drawEndArrow() {
-        console.log('base draw end point');
+      key: "getTotalOffset",
+      value: function getTotalOffset(pointer) {
+        var offsetLeft = pointer.offsetLeft + pointer.offsetParent.offsetLeft;
+        var offsetTop = pointer.offsetTop + pointer.offsetParent.offsetTop;
+        return {
+          offsetLeft: offsetLeft,
+          offsetTop: offsetTop
+        };
       }
     }, {
+      key: "checkIfMouseEventOnArrow",
+      value: function checkIfMouseEventOnArrow(event) {
+        var _mapping;
+
+        var isNear = function isNear(a, b) {
+          return Math.abs(a - b) < 50;
+        };
+
+        var offsetX = event.offsetX,
+            offsetY = event.offsetY;
+        var mapping = (_mapping = {}, _defineProperty(_mapping, StartPositionEnum.horizontalLeftTop, 'rightBottom'), _defineProperty(_mapping, StartPositionEnum.verticalLeftTop, 'rightBottom'), _mapping);
+
+        var _this$svgParameters$m = _slicedToArray(this.svgParameters[mapping[this.startPosition]], 2),
+            arrowX = _this$svgParameters$m[0],
+            arrowY = _this$svgParameters$m[1];
+
+        return isNear(offsetX, arrowX) && isNear(offsetY, arrowY);
+      } // Functions that can be inherited or override
+      // Used for the children classes, ep: ConnectorBase, ConnectorFlowchart...
+
+      /**
+       * When mouse move into the connection, the hover color shall be changed
+       * @param event: MouseEvent
+       */
+
+    }]);
+
+    return Connector;
+  }();
+
+  var ConnectorBase =
+  /*#__PURE__*/
+  function (_Connector) {
+    _inherits(ConnectorBase, _Connector);
+
+    // whether the user is moving the arrow
+    function ConnectorBase(playground, startElement, endElement, options) {
+      var _this;
+
+      _classCallCheck(this, ConnectorBase);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(ConnectorBase).call(this, playground, startElement, endElement, options));
+      _this.isModifyingConnector = false;
+      return _this;
+    }
+
+    _createClass(ConnectorBase, [{
       key: "drawPath",
       value: function drawPath() {
         var startCoordinate;
@@ -551,7 +731,11 @@
             break;
         }
 
-        var path = createPolyline(this.options);
+        var path = createPolyline(this.options, {
+          onmouseenter: this.onmouseenter,
+          onmouseleave: this.onmouseleave,
+          onmousedown: this.onmousedown
+        });
         straightPolyline(path, startCoordinate, endCoordinate);
         path.style.markerEnd = 'url(#markerEndArrow)';
         this.svgElement.appendChild(path);
@@ -559,7 +743,7 @@
     }]);
 
     return ConnectorBase;
-  }();
+  }(Connector);
 
   var Draggable =
   /*#__PURE__*/
@@ -568,7 +752,6 @@
       _classCallCheck(this, Draggable);
 
       this.isDragging = false;
-      this.isCreatingNewConnector = false;
       this.elem = elem;
       this.dragOptions = dragOptions || {
         type: 'straight'
@@ -629,8 +812,8 @@
 
   var ConnectorFlowchart =
   /*#__PURE__*/
-  function (_ConnectorBase) {
-    _inherits(ConnectorFlowchart, _ConnectorBase);
+  function (_Connector) {
+    _inherits(ConnectorFlowchart, _Connector);
 
     function ConnectorFlowchart(playground, startPoint, endPoint, options) {
       _classCallCheck(this, ConnectorFlowchart);
@@ -639,67 +822,6 @@
     }
 
     _createClass(ConnectorFlowchart, [{
-      key: "drawEndArrow",
-      value: function drawEndArrow() {
-        // half of the arrow's deg, described in radius value
-        var arrowDeg = 45 / 360 * Math.PI;
-        var _this$svgParameters = this.svgParameters,
-            leftTop = _this$svgParameters.leftTop,
-            leftBottom = _this$svgParameters.leftBottom,
-            rightTop = _this$svgParameters.rightTop,
-            rightBottom = _this$svgParameters.rightBottom;
-        var _this$options = this.options,
-            arrowSize = _this$options.arrowSize,
-            color = _this$options.color;
-        var arrowPath = createSvgElement('path', {
-          fill: color
-        });
-
-        var verticalHandler = function verticalHandler(positionValue, factor) {
-          arrowPath.setAttributeNS(null, 'd', "\n          M".concat(positionValue[0], " ").concat(positionValue[1], "\n          L").concat(positionValue[0] + factor * arrowSize * Math.sin(arrowDeg), "\n           ").concat(positionValue[1] - factor * arrowSize * Math.cos(arrowDeg), "\n          L").concat(positionValue[0], " ").concat(positionValue[1] - factor * arrowSize * 0.6, "\n          L").concat(positionValue[0] - factor * arrowSize * Math.sin(arrowDeg), "\n           ").concat(positionValue[1] - factor * arrowSize * Math.cos(arrowDeg), "\n          Z\n        "));
-        };
-
-        var horizontalHandler = function horizontalHandler(positionValue, factor) {
-          arrowPath.setAttributeNS(null, 'd', "\n          M".concat(positionValue[0], " ").concat(positionValue[1], "\n          L").concat(positionValue[0] - factor * arrowSize * Math.cos(arrowDeg), " ").concat(positionValue[1] + factor * arrowSize * Math.sin(arrowDeg), "\n          L").concat(positionValue[0] - factor * arrowSize * 0.6, " ").concat(positionValue[1], "\n          L").concat(positionValue[0] - factor * arrowSize * Math.cos(arrowDeg), " ").concat(positionValue[1] - factor * arrowSize * Math.sin(arrowDeg), "\n          Z\n        "));
-        };
-
-        switch (this.startPosition) {
-          case StartPositionEnum.verticalLeftTop:
-            verticalHandler(rightBottom, 1);
-            break;
-
-          case StartPositionEnum.horizontalLeftTop:
-            horizontalHandler(rightBottom, 1);
-            break;
-
-          case StartPositionEnum.verticalRightTop:
-            verticalHandler(leftBottom, 1);
-            break;
-
-          case StartPositionEnum.horizontalRightTop:
-            horizontalHandler(leftBottom, -1);
-            break;
-
-          case StartPositionEnum.verticalLeftBottom:
-            verticalHandler(rightTop, -1);
-            break;
-
-          case StartPositionEnum.horizontalLeftBottom:
-            horizontalHandler(rightTop, 1);
-            break;
-
-          case StartPositionEnum.verticalRightBottom:
-            verticalHandler(leftTop, -1);
-            break;
-
-          case StartPositionEnum.horizontalRightBottom:
-            horizontalHandler(leftTop, -1);
-            break;
-        }
-
-        this.svgElement.appendChild(arrowPath);
-      }
-    }, {
       key: "drawPath",
       value: function drawPath() {
         var svgWidth = this.svgElement.width.baseVal.valueInSpecifiedUnits;
@@ -766,14 +888,19 @@
             endCoordinate = this.svgParameters.leftTop;
         }
 
-        var path = createPolyline(this.options);
+        var path = createPolyline(this.options, {
+          onmouseenter: this.onmouseenter,
+          onmouseleave: this.onmouseleave,
+          onmousedown: this.onmousedown
+        });
         stateMachinePolyLine(path, startCoordinate, middleACoordinate, middleBCoordinate, endCoordinate);
+        path.style.markerEnd = 'url(#markerEndArrow)';
         this.svgElement.appendChild(path);
       }
     }]);
 
     return ConnectorFlowchart;
-  }(ConnectorBase);
+  }(Connector);
 
   var TYPE_MAP = {
     undefined: ConnectorBase,
@@ -793,7 +920,11 @@
       _classCallCheck(this, Connectable);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Connectable).call(this, elem, dragOptions));
+      _this.isCreatingNewConnector = false;
       _this.nativeElement = elem;
+      setStyle(elem, {
+        zIndex: '2'
+      });
       _this.playground = playground;
       _this.onCreatingLine = onCreatingLine;
       addClassIfNotExist(elem, "".concat(prefixCls, "-element"));
@@ -927,7 +1058,10 @@
       this.connections = [];
       this.elementConnectionsMap = {};
       this.playground = playground;
-      this.options = options; // set the playground to position relative
+      this.options = _objectSpread2({
+        color: '#cccccc',
+        hoverColor: 'red'
+      }, options); // set the playground to position relative
       // init the connections
 
       var _iteratorNormalCompletion = true;

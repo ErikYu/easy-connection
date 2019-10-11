@@ -15,10 +15,14 @@ export class Connectable extends Draggable {
   playground: HTMLElement;
   nativeElement: HTMLElement;
   helperPointer: HTMLElement;
+  isCreatingNewConnector = false;
   onCreatingLine;
   constructor(playground: HTMLElement, elem: HTMLElement, dragOptions: DragOptions, { onCreatingLine }) {
     super(elem, dragOptions);
     this.nativeElement = elem;
+    setStyle(elem, {
+      zIndex: '2',
+    });
     this.playground = playground;
     this.onCreatingLine = onCreatingLine;
     addClassIfNotExist(elem, `${prefixCls}-element`);
@@ -59,7 +63,12 @@ export class Connectable extends Draggable {
         top: `${y - helperPointOffset}px`,
       });
       this.playground.appendChild(this.helperPointer);
-      let _newConnection = new TYPE_MAP[this.dragOptions.type](this.playground, this.elem, this.helperPointer, this.dragOptions);
+      let _newConnection = new TYPE_MAP[this.dragOptions.type](
+        this.playground,
+        this.elem,
+        this.helperPointer,
+        this.dragOptions,
+      );
 
       // TODO: onmousemove and onmouseup's listener should be removed after onmouseup
       document.onmousemove = (_event: MouseEvent) => {
