@@ -15,7 +15,7 @@ export function createSvgElement(label: svgElement, styleMap: IndexedObject) {
 
 export function createPolyline(options: ConnectorOptions): SVGPolylineElement {
   const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-  polyline.setAttributeNS(null, 'fill', 'transparent');
+  polyline.setAttributeNS(null, 'fill', 'none');
   polyline.setAttributeNS(null, 'stroke', `${options.color}`);
   polyline.setAttributeNS(null, 'stroke-width', `${options.strokeWidth}`);
   return polyline;
