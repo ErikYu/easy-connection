@@ -9,7 +9,7 @@
     "bundle": "rollup -c --environment INCLUDE_DEPS,BUILD:dev",
     "tsc": "./node_modules/.bin/tsc --emitDeclarationOnly --outDir dist",
     "build": "rm -rf ./dist && yarn run tsc && yarn run bundle",
-    "prettier": "prettier --write all \"src/**/*.ts\" \"src/**/*.scss\"" ,
+    "prettier": "prettier --write all \"src/**/*.ts\" \"src/**/*.scss\"",
     "tslint": "tslint --project tsconfig.json",
     "precommit": "yarn run prettier && yarn run tslint",
     "test": "test"
@@ -21,6 +21,7 @@
     "@babel/preset-env": "7.3.4",
     "@babel/preset-typescript": "7.3.3",
     "babel-plugin-transform-class-properties": "^6.24.1",
+    "husky": "^3.0.8",
     "prettier": "^1.18.2",
     "rollup": "1.4.0",
     "rollup-plugin-babel": "4.3.2",
