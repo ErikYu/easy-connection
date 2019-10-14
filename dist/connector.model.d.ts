@@ -1,4 +1,4 @@
-export declare type ConnectorPointPosition = 'top' | 'left' | 'right' | 'bottom';
+export declare type ConnectorPointerPosition = 'vertical' | 'horizontal' | 'auto';
 export declare type ConnectionType = 'stateMachine' | 'straight';
 declare type PromiseOr<T> = Promise<T> | T;
 export interface ConnectorOptions {
@@ -7,6 +7,7 @@ export interface ConnectorOptions {
     color?: string;
     hoverColor?: string;
     arrowSize?: number;
+    pointerPosition?: ConnectorPointerPosition;
 }
 export interface EasyConnectionOptions extends ConnectorOptions {
     type: ConnectionType;

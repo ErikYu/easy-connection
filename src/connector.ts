@@ -3,6 +3,8 @@ import { addClassIfNotExist, removeClass, setStyle } from './utils';
 import { prefixCls } from './constraints';
 import { ConnectorPoint } from './connector-point';
 
+import { getStartPosition } from './helpers/element-position-helper';
+
 /**
  * The root class of connection
  */
@@ -45,13 +47,7 @@ export abstract class Connector {
     endElement: HTMLElement,
     options: ConnectorOptions,
   ) {
-    this.options = {
-      pointerSize: 4,
-      strokeWidth: 1,
-      color: '#cccccc',
-      arrowSize: 15,
-      ...options,
-    };
+    this.options = options;
     this.startElement = startElement;
     this.endElement = endElement;
     addClassIfNotExist(startElement, `${prefixCls}-element`);
@@ -126,33 +122,11 @@ export abstract class Connector {
     const xDistance = startElement.offsetLeft - endElement.offsetLeft;
     const yDistance = startElement.offsetTop - endElement.offsetTop;
 
-    if (Math.abs(xDistance) >= Math.abs(yDistance)) {
-      if (xDistance <= 0 && yDistance <= 0) {
-        this.startPosition = StartPositionEnum.horizontalLeftTop;
-      } else if (xDistance <= 0 && yDistance > 0) {
-        this.startPosition = StartPositionEnum.horizontalLeftBottom;
-      } else if (xDistance > 0 && yDistance <= 0) {
-        this.startPosition = StartPositionEnum.horizontalRightTop;
-      } else {
-        this.startPosition = StartPositionEnum.horizontalRightBottom;
-      }
-    } else {
-      if (xDistance <= 0 && yDistance <= 0) {
-        this.startPosition = StartPositionEnum.verticalLeftTop;
-      } else if (xDistance <= 0 && yDistance > 0) {
-        this.startPosition = StartPositionEnum.verticalLeftBottom;
-      } else if (xDistance > 0 && yDistance <= 0) {
-        this.startPosition = StartPositionEnum.verticalRightTop;
-      } else {
-        this.startPosition = StartPositionEnum.verticalRightBottom;
-      }
-    }
+    this.startPosition = getStartPosition(xDistance, yDistance, this.options.pointerPosition);
 
     switch (this.startPosition) {
       case StartPositionEnum.horizontalLeftTop:
       case StartPositionEnum.horizontalLeftBottom:
-        ((startPointer as unknown) as ConnectorPoint).position = 'right';
-        ((endPointer as unknown) as ConnectorPoint).position = 'left';
         startPointer.style.left = `${startElement.getBoundingClientRect().width}px`;
         startPointer.style.top = `${startElement.getBoundingClientRect().height / 2 - this.options.pointerSize / 2}px`;
         endPointer.style.left = `${-this.options.pointerSize}px`;
@@ -160,8 +134,6 @@ export abstract class Connector {
         break;
       case StartPositionEnum.horizontalRightBottom:
       case StartPositionEnum.horizontalRightTop:
-        ((startPointer as unknown) as ConnectorPoint).position = 'left';
-        ((endPointer as unknown) as ConnectorPoint).position = 'right';
         startPointer.style.left = `${-this.options.pointerSize}px`;
         startPointer.style.top = `${startElement.getBoundingClientRect().height / 2 - this.options.pointerSize / 2}px`;
         endPointer.style.left = `${endElement.getBoundingClientRect().width}px`;
@@ -171,8 +143,6 @@ export abstract class Connector {
       case StartPositionEnum.verticalRightTop:
         // startElem -> bottom
         // endElem   -> top
-        ((startPointer as unknown) as ConnectorPoint).position = 'bottom';
-        ((endPointer as unknown) as ConnectorPoint).position = 'top';
         startPointer.style.left = `${startElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2}px`;
         startPointer.style.top = `${startElement.getBoundingClientRect().height}px`;
         endPointer.style.left = `${endElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2}px`;
@@ -182,8 +152,6 @@ export abstract class Connector {
       case StartPositionEnum.verticalRightBottom:
         // startElem -> top
         // endElem   -> bottom
-        ((startPointer as unknown) as ConnectorPoint).position = 'top';
-        ((endPointer as unknown) as ConnectorPoint).position = 'bottom';
         startPointer.style.left = `${startElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2}px`;
         startPointer.style.top = `-${this.options.pointerSize}px`;
         endPointer.style.left = `${endElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2}px`;
@@ -314,7 +282,6 @@ export abstract class Connector {
    */
   onmousedown = (event: MouseEvent) => {
     const isOnArrow = this.checkIfMouseEventOnArrow(event);
-    console.log(isOnArrow);
     if (isOnArrow) {
       // this connection should be removed and temp lines should be created
       // build a helper pointer and connect it with the helper point

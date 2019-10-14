@@ -166,6 +166,11 @@
     throw new TypeError("Invalid attempt to destructure non-iterable instance");
   }
 
+  // The preset position of the ConnectorPointer
+  // `vertical` contains `bottom` & `top`
+  // `horizontal` contains `left` & `right`
+  // When `auto`, the position will change according to the relative position
+  // The default value is `auto`
   var StartPositionEnum;
 
   (function (StartPositionEnum) {
@@ -296,9 +301,48 @@
 
   var prefixCls = 'cnt';
 
+  function _horizontalHandler(xDistance, yDistance) {
+    if (xDistance <= 0 && yDistance <= 0) {
+      return StartPositionEnum.horizontalLeftTop;
+    } else if (xDistance <= 0 && yDistance > 0) {
+      return StartPositionEnum.horizontalLeftBottom;
+    } else if (xDistance > 0 && yDistance <= 0) {
+      return StartPositionEnum.horizontalRightTop;
+    } else {
+      return StartPositionEnum.horizontalRightBottom;
+    }
+  }
+
+  function _verticalHandler(xDistance, yDistance) {
+    if (xDistance <= 0 && yDistance <= 0) {
+      return StartPositionEnum.verticalLeftTop;
+    } else if (xDistance <= 0 && yDistance > 0) {
+      return StartPositionEnum.verticalLeftBottom;
+    } else if (xDistance > 0 && yDistance <= 0) {
+      return StartPositionEnum.verticalRightTop;
+    } else {
+      return StartPositionEnum.verticalRightBottom;
+    }
+  }
+
+  function getStartPosition(xDistance, yDistance, pointerPosition) {
+    switch (pointerPosition) {
+      case 'auto':
+        return Math.abs(xDistance) >= Math.abs(yDistance) ? _horizontalHandler(xDistance, yDistance) : _verticalHandler(xDistance, yDistance);
+
+      case 'horizontal':
+        return _horizontalHandler(xDistance, yDistance);
+
+      case 'vertical':
+      default:
+        return _verticalHandler(xDistance, yDistance);
+    }
+  }
+
   /**
    * The root class of connection
    */
+
   var Connector =
   /*#__PURE__*/
   function () {
@@ -337,8 +381,6 @@
 
       this.onmousedown = function (event) {
         var isOnArrow = _this.checkIfMouseEventOnArrow(event);
-
-        console.log(isOnArrow);
 
         if (isOnArrow) {
           // this connection should be removed and temp lines should be created
@@ -416,12 +458,7 @@
 
       };
 
-      this.options = _objectSpread2({
-        pointerSize: 4,
-        strokeWidth: 1,
-        color: '#cccccc',
-        arrowSize: 15
-      }, options);
+      this.options = options;
       this.startElement = startElement;
       this.endElement = endElement;
       addClassIfNotExist(startElement, "".concat(prefixCls, "-element"));
@@ -499,34 +536,11 @@
         endPointer.style.height = "".concat(this.options.pointerSize, "px");
         var xDistance = startElement.offsetLeft - endElement.offsetLeft;
         var yDistance = startElement.offsetTop - endElement.offsetTop;
-
-        if (Math.abs(xDistance) >= Math.abs(yDistance)) {
-          if (xDistance <= 0 && yDistance <= 0) {
-            this.startPosition = StartPositionEnum.horizontalLeftTop;
-          } else if (xDistance <= 0 && yDistance > 0) {
-            this.startPosition = StartPositionEnum.horizontalLeftBottom;
-          } else if (xDistance > 0 && yDistance <= 0) {
-            this.startPosition = StartPositionEnum.horizontalRightTop;
-          } else {
-            this.startPosition = StartPositionEnum.horizontalRightBottom;
-          }
-        } else {
-          if (xDistance <= 0 && yDistance <= 0) {
-            this.startPosition = StartPositionEnum.verticalLeftTop;
-          } else if (xDistance <= 0 && yDistance > 0) {
-            this.startPosition = StartPositionEnum.verticalLeftBottom;
-          } else if (xDistance > 0 && yDistance <= 0) {
-            this.startPosition = StartPositionEnum.verticalRightTop;
-          } else {
-            this.startPosition = StartPositionEnum.verticalRightBottom;
-          }
-        }
+        this.startPosition = getStartPosition(xDistance, yDistance, this.options.pointerPosition);
 
         switch (this.startPosition) {
           case StartPositionEnum.horizontalLeftTop:
           case StartPositionEnum.horizontalLeftBottom:
-            startPointer.position = 'right';
-            endPointer.position = 'left';
             startPointer.style.left = "".concat(startElement.getBoundingClientRect().width, "px");
             startPointer.style.top = "".concat(startElement.getBoundingClientRect().height / 2 - this.options.pointerSize / 2, "px");
             endPointer.style.left = "".concat(-this.options.pointerSize, "px");
@@ -535,8 +549,6 @@
 
           case StartPositionEnum.horizontalRightBottom:
           case StartPositionEnum.horizontalRightTop:
-            startPointer.position = 'left';
-            endPointer.position = 'right';
             startPointer.style.left = "".concat(-this.options.pointerSize, "px");
             startPointer.style.top = "".concat(startElement.getBoundingClientRect().height / 2 - this.options.pointerSize / 2, "px");
             endPointer.style.left = "".concat(endElement.getBoundingClientRect().width, "px");
@@ -547,8 +559,6 @@
           case StartPositionEnum.verticalRightTop:
             // startElem -> bottom
             // endElem   -> top
-            startPointer.position = 'bottom';
-            endPointer.position = 'top';
             startPointer.style.left = "".concat(startElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2, "px");
             startPointer.style.top = "".concat(startElement.getBoundingClientRect().height, "px");
             endPointer.style.left = "".concat(endElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2, "px");
@@ -559,8 +569,6 @@
           case StartPositionEnum.verticalRightBottom:
             // startElem -> top
             // endElem   -> bottom
-            startPointer.position = 'top';
-            endPointer.position = 'bottom';
             startPointer.style.left = "".concat(startElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2, "px");
             startPointer.style.top = "-".concat(this.options.pointerSize, "px");
             endPointer.style.left = "".concat(endElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2, "px");
@@ -1060,7 +1068,11 @@
       this.playground = playground;
       this.options = _objectSpread2({
         color: '#cccccc',
-        hoverColor: 'red'
+        hoverColor: 'red',
+        pointerPosition: 'auto',
+        pointerSize: 4,
+        strokeWidth: 1,
+        arrowSize: 15
       }, options); // set the playground to position relative
       // init the connections
 
@@ -1095,7 +1107,7 @@
       try {
         for (var _iterator2 = connections[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
           var con = _step2.value;
-          var connectionInstance = new TYPE_MAP$1[options.type](playground, con.start, con.end, options);
+          var connectionInstance = new TYPE_MAP$1[options.type](playground, con.start, con.end, this.options);
           this.elementConnectionsMap[con.start.id].push(connectionInstance);
           this.elementConnectionsMap[con.end.id].push(connectionInstance);
           this.connections.push(connectionInstance);
@@ -1123,7 +1135,7 @@
         var _loop = function _loop() {
           var elem = _step3.value;
 
-          _this.connectableElements.push(new Connectable(playground, elem, _objectSpread2({}, options, {
+          _this.connectableElements.push(new Connectable(playground, elem, _objectSpread2({}, _this.options, {
             onDragging: function onDragging() {
               // all lines connected to this element should be reRendered
               _this.elementConnectionsMap[elem.id].forEach(function (i) {
