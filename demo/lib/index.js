@@ -192,6 +192,7 @@
     polyline.setAttributeNS(null, 'fill', 'none');
     polyline.setAttributeNS(null, 'stroke', "".concat(options.color));
     polyline.setAttributeNS(null, 'stroke-width', "".concat(options.strokeWidth));
+    polyline.setAttributeNS(null, 'pointer-events', "visibleStroke");
     polyline.onmouseenter = onmouseenter;
     polyline.onmouseleave = onmouseleave;
     polyline.onmousedown = onmousedown;
@@ -394,8 +395,9 @@
     // use position attribute to handle with ethe position
 
     svgElement.style.position = 'absolute';
-    svgElement.style.zIndex = '999';
+    svgElement.style.zIndex = '1';
     svgElement.style.overflow = 'visible';
+    svgElement.setAttribute('pointer-events', 'none');
 
     var _getTotalOffset2 = _getTotalOffset(startPointer),
         startOffsetLeft = _getTotalOffset2.offsetLeft,
