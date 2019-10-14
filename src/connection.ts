@@ -32,6 +32,10 @@ export class EasyConnection {
     this.options = {
       color: '#cccccc',
       hoverColor: 'red',
+      pointerPosition: 'auto',
+      pointerSize: 4,
+      strokeWidth: 1,
+      arrowSize: 15,
       ...options,
     };
     // set the playground to position relative
@@ -40,7 +44,7 @@ export class EasyConnection {
       this.elementConnectionsMap[elem.id] = [];
     }
     for (const con of connections) {
-      const connectionInstance = new TYPE_MAP[options.type](playground, con.start, con.end, options);
+      const connectionInstance = new TYPE_MAP[options.type](playground, con.start, con.end, this.options);
       this.elementConnectionsMap[con.start.id].push(connectionInstance);
       this.elementConnectionsMap[con.end.id].push(connectionInstance);
       this.connections.push(connectionInstance);
@@ -51,7 +55,7 @@ export class EasyConnection {
           playground,
           elem,
           {
-            ...options,
+            ...this.options,
             onDragging: () => {
               // all lines connected to this element should be reRendered
               this.elementConnectionsMap[elem.id].forEach(i => i.renderLine());

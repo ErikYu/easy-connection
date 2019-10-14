@@ -1,4 +1,9 @@
-export type ConnectorPointPosition = 'top' | 'left' | 'right' | 'bottom';
+// The preset position of the ConnectorPointer
+// `vertical` contains `bottom` & `top`
+// `horizontal` contains `left` & `right`
+// When `auto`, the position will change according to the relative position
+// The default value is `auto`
+export type ConnectorPointerPosition = 'vertical' | 'horizontal' | 'auto';
 export type ConnectionType = 'stateMachine' | 'straight';
 
 type PromiseOr<T> = Promise<T> | T;
@@ -7,8 +12,13 @@ export interface ConnectorOptions {
   pointerSize?: number;
   strokeWidth?: number;
   color?: string;
+
+  // When mouseover the connection, the line's color changes into `hoverColor`
   hoverColor?: string;
   arrowSize?: number;
+
+  // The connect-pointer's position
+  pointerPosition?: ConnectorPointerPosition;
 }
 
 export interface EasyConnectionOptions extends ConnectorOptions {
