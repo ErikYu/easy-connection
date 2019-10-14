@@ -21,8 +21,9 @@ function createSvgArea(
   // set svg position
   // use position attribute to handle with ethe position
   svgElement.style.position = 'absolute';
-  svgElement.style.zIndex = '999';
+  svgElement.style.zIndex = '1';
   svgElement.style.overflow = 'visible';
+  svgElement.setAttribute('pointer-events', 'none');
   const { offsetLeft: startOffsetLeft, offsetTop: startOffsetTop } = _getTotalOffset(startPointer);
   const { offsetLeft: endOffsetLeft, offsetTop: endOffsetTop } = _getTotalOffset(endPointer);
 
