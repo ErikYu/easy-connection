@@ -28,6 +28,7 @@ export function createPolyline(
   polyline.setAttributeNS(null, 'fill', 'none');
   polyline.setAttributeNS(null, 'stroke', `${options.color}`);
   polyline.setAttributeNS(null, 'stroke-width', `${options.strokeWidth}`);
+  polyline.setAttributeNS(null, 'pointer-events', `visibleStroke`);
   polyline.onmouseenter = onmouseenter;
   polyline.onmouseleave = onmouseleave;
   polyline.onmousedown = onmousedown;

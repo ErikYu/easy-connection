@@ -166,6 +166,11 @@
     throw new TypeError("Invalid attempt to destructure non-iterable instance");
   }
 
+  // The preset position of the ConnectorPointer
+  // `vertical` contains `bottom` & `top`
+  // `horizontal` contains `left` & `right`
+  // When `auto`, the position will change according to the relative position
+  // The default value is `auto`
   var StartPositionEnum;
 
   (function (StartPositionEnum) {
@@ -187,6 +192,7 @@
     polyline.setAttributeNS(null, 'fill', 'none');
     polyline.setAttributeNS(null, 'stroke', "".concat(options.color));
     polyline.setAttributeNS(null, 'stroke-width', "".concat(options.strokeWidth));
+    polyline.setAttributeNS(null, 'pointer-events', "visibleStroke");
     polyline.onmouseenter = onmouseenter;
     polyline.onmouseleave = onmouseleave;
     polyline.onmousedown = onmousedown;
@@ -312,9 +318,157 @@
 
   var prefixCls = 'cnt';
 
+  function getConnectionPointCoordinate(startPosition, startElement, endElement, pointerSize) {
+    switch (startPosition) {
+      case StartPositionEnum.horizontalLeftTop:
+      case StartPositionEnum.horizontalLeftBottom:
+        return {
+          startLeft: "".concat(startElement.getBoundingClientRect().width, "px"),
+          startTop: "".concat(startElement.getBoundingClientRect().height / 2 - pointerSize / 2, "px"),
+          endLeft: "".concat(-pointerSize, "px"),
+          entTop: "".concat(endElement.getBoundingClientRect().height / 2 - pointerSize / 2, "px")
+        };
+
+      case StartPositionEnum.horizontalRightBottom:
+      case StartPositionEnum.horizontalRightTop:
+        return {
+          startLeft: "".concat(-pointerSize, "px"),
+          startTop: "".concat(startElement.getBoundingClientRect().height / 2 - pointerSize / 2, "px"),
+          endLeft: "".concat(endElement.getBoundingClientRect().width, "px"),
+          entTop: "".concat(endElement.getBoundingClientRect().height / 2 - pointerSize / 2, "px")
+        };
+
+      case StartPositionEnum.verticalLeftTop:
+      case StartPositionEnum.verticalRightTop:
+        // startElem -> bottom
+        // endElem   -> top
+        return {
+          startLeft: "".concat(startElement.getBoundingClientRect().width / 2 - pointerSize / 2, "px"),
+          startTop: "".concat(startElement.getBoundingClientRect().height, "px"),
+          endLeft: "".concat(endElement.getBoundingClientRect().width / 2 - pointerSize / 2, "px"),
+          entTop: "".concat(-pointerSize, "px")
+        };
+
+      case StartPositionEnum.verticalLeftBottom:
+      case StartPositionEnum.verticalRightBottom:
+        // startElem -> top
+        // endElem   -> bottom
+        return {
+          startLeft: "".concat(startElement.getBoundingClientRect().width / 2 - pointerSize / 2, "px"),
+          startTop: "-".concat(pointerSize, "px"),
+          endLeft: "".concat(endElement.getBoundingClientRect().width / 2 - pointerSize / 2, "px"),
+          entTop: "".concat(endElement.getBoundingClientRect().height, "px")
+        };
+    }
+  }
+
+  function _horizontalHandler(xDistance, yDistance) {
+    if (xDistance <= 0 && yDistance <= 0) {
+      return StartPositionEnum.horizontalLeftTop;
+    } else if (xDistance <= 0 && yDistance > 0) {
+      return StartPositionEnum.horizontalLeftBottom;
+    } else if (xDistance > 0 && yDistance <= 0) {
+      return StartPositionEnum.horizontalRightTop;
+    } else {
+      return StartPositionEnum.horizontalRightBottom;
+    }
+  }
+
+  function _verticalHandler(xDistance, yDistance) {
+    if (xDistance <= 0 && yDistance <= 0) {
+      return StartPositionEnum.verticalLeftTop;
+    } else if (xDistance <= 0 && yDistance > 0) {
+      return StartPositionEnum.verticalLeftBottom;
+    } else if (xDistance > 0 && yDistance <= 0) {
+      return StartPositionEnum.verticalRightTop;
+    } else {
+      return StartPositionEnum.verticalRightBottom;
+    }
+  }
+
+  function getStartPosition(xDistance, yDistance, pointerPosition) {
+    switch (pointerPosition) {
+      case 'auto':
+        return Math.abs(xDistance) >= Math.abs(yDistance) ? _horizontalHandler(xDistance, yDistance) : _verticalHandler(xDistance, yDistance);
+
+      case 'horizontal':
+        return _horizontalHandler(xDistance, yDistance);
+
+      case 'vertical':
+      default:
+        return _verticalHandler(xDistance, yDistance);
+    }
+  }
+
+  /**
+   * Create a svg area used for the connection line between the start and end point
+   * the area is rect
+   */
+
+  function createSvgArea(startPosition, startPointer, endPointer, options) {
+    var svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgElement.innerHTML = "\n    <defs>\n      <marker id=\"markerEndArrow\" viewBox=\"0 0 30 30\" refX=\"9\" refY=\"3\"  markerUnits=\"strokeWidth\" markerWidth=\"30\" markerHeight=\"30\" orient=\"auto\">\n        <path style=\"fill:".concat(options.color, ";opacity:1\" d=\"M0,0 0,6 9,3z\" />\n      </marker>\n    </defs>"); // set svg position
+    // use position attribute to handle with ethe position
+
+    svgElement.style.position = 'absolute';
+    svgElement.style.zIndex = '1';
+    svgElement.style.overflow = 'visible';
+    svgElement.setAttribute('pointer-events', 'none');
+
+    var _getTotalOffset2 = _getTotalOffset(startPointer),
+        startOffsetLeft = _getTotalOffset2.offsetLeft,
+        startOffsetTop = _getTotalOffset2.offsetTop;
+
+    var _getTotalOffset3 = _getTotalOffset(endPointer),
+        endOffsetLeft = _getTotalOffset3.offsetLeft,
+        endOffsetTop = _getTotalOffset3.offsetTop;
+
+    switch (startPosition) {
+      case StartPositionEnum.horizontalLeftTop:
+      case StartPositionEnum.verticalLeftTop:
+        svgElement.style.left = "".concat(startOffsetLeft, "px");
+        svgElement.style.top = "".concat(startOffsetTop, "px");
+        break;
+
+      case StartPositionEnum.horizontalRightTop:
+      case StartPositionEnum.verticalRightTop:
+        svgElement.style.left = "".concat(endOffsetLeft, "px");
+        svgElement.style.top = "".concat(startOffsetTop, "px");
+        break;
+
+      case StartPositionEnum.horizontalLeftBottom:
+      case StartPositionEnum.verticalLeftBottom:
+        svgElement.style.left = "".concat(startOffsetLeft, "px");
+        svgElement.style.top = "".concat(endOffsetTop, "px");
+        break;
+
+      case StartPositionEnum.horizontalRightBottom:
+      case StartPositionEnum.verticalRightBottom:
+        svgElement.style.left = "".concat(endOffsetLeft, "px");
+        svgElement.style.top = "".concat(endOffsetTop, "px");
+        break;
+    }
+
+    var width = Math.abs(startOffsetLeft - endOffsetLeft) + options.pointerSize;
+    var height = Math.abs(startOffsetTop - endOffsetTop) + options.pointerSize;
+    svgElement.setAttribute('width', "".concat(width, "px"));
+    svgElement.setAttribute('height', "".concat(height, "px"));
+    return svgElement;
+  }
+
+  function _getTotalOffset(pointer) {
+    var offsetLeft = pointer.offsetLeft + pointer.offsetParent.offsetLeft;
+    var offsetTop = pointer.offsetTop + pointer.offsetParent.offsetTop;
+    return {
+      offsetLeft: offsetLeft,
+      offsetTop: offsetTop
+    };
+  }
+
   /**
    * The root class of connection
    */
+
   var Connector =
   /*#__PURE__*/
   function () {
@@ -353,8 +507,6 @@
 
       this.onmousedown = function (event) {
         var isOnArrow = _this.checkIfMouseEventOnArrow(event);
-
-        console.log(isOnArrow);
 
         if (isOnArrow) {
           // this connection should be removed and temp lines should be created
@@ -432,12 +584,7 @@
 
       };
 
-      this.options = _objectSpread2({
-        pointerSize: 4,
-        strokeWidth: 1,
-        color: '#cccccc',
-        arrowSize: 15
-      }, options);
+      this.options = options;
       this.startElement = startElement;
       this.endElement = endElement;
       addClassIfNotExist(startElement, "".concat(prefixCls, "-element"));
@@ -515,75 +662,18 @@
         endPointer.style.height = "".concat(this.options.pointerSize, "px");
         var xDistance = startElement.offsetLeft - endElement.offsetLeft;
         var yDistance = startElement.offsetTop - endElement.offsetTop;
+        this.startPosition = getStartPosition(xDistance, yDistance, this.options.pointerPosition);
 
-        if (Math.abs(xDistance) >= Math.abs(yDistance)) {
-          if (xDistance <= 0 && yDistance <= 0) {
-            this.startPosition = StartPositionEnum.horizontalLeftTop;
-          } else if (xDistance <= 0 && yDistance > 0) {
-            this.startPosition = StartPositionEnum.horizontalLeftBottom;
-          } else if (xDistance > 0 && yDistance <= 0) {
-            this.startPosition = StartPositionEnum.horizontalRightTop;
-          } else {
-            this.startPosition = StartPositionEnum.horizontalRightBottom;
-          }
-        } else {
-          if (xDistance <= 0 && yDistance <= 0) {
-            this.startPosition = StartPositionEnum.verticalLeftTop;
-          } else if (xDistance <= 0 && yDistance > 0) {
-            this.startPosition = StartPositionEnum.verticalLeftBottom;
-          } else if (xDistance > 0 && yDistance <= 0) {
-            this.startPosition = StartPositionEnum.verticalRightTop;
-          } else {
-            this.startPosition = StartPositionEnum.verticalRightBottom;
-          }
-        }
+        var _getConnectionPointCo = getConnectionPointCoordinate(this.startPosition, startElement, endElement, this.options.pointerSize),
+            startLeft = _getConnectionPointCo.startLeft,
+            startTop = _getConnectionPointCo.startTop,
+            endLeft = _getConnectionPointCo.endLeft,
+            entTop = _getConnectionPointCo.entTop;
 
-        switch (this.startPosition) {
-          case StartPositionEnum.horizontalLeftTop:
-          case StartPositionEnum.horizontalLeftBottom:
-            startPointer.position = 'right';
-            endPointer.position = 'left';
-            startPointer.style.left = "".concat(startElement.getBoundingClientRect().width, "px");
-            startPointer.style.top = "".concat(startElement.getBoundingClientRect().height / 2 - this.options.pointerSize / 2, "px");
-            endPointer.style.left = "".concat(-this.options.pointerSize, "px");
-            endPointer.style.top = "".concat(endElement.getBoundingClientRect().height / 2 - this.options.pointerSize / 2, "px");
-            break;
-
-          case StartPositionEnum.horizontalRightBottom:
-          case StartPositionEnum.horizontalRightTop:
-            startPointer.position = 'left';
-            endPointer.position = 'right';
-            startPointer.style.left = "".concat(-this.options.pointerSize, "px");
-            startPointer.style.top = "".concat(startElement.getBoundingClientRect().height / 2 - this.options.pointerSize / 2, "px");
-            endPointer.style.left = "".concat(endElement.getBoundingClientRect().width, "px");
-            endPointer.style.top = "".concat(endElement.getBoundingClientRect().height / 2 - this.options.pointerSize / 2, "px");
-            break;
-
-          case StartPositionEnum.verticalLeftTop:
-          case StartPositionEnum.verticalRightTop:
-            // startElem -> bottom
-            // endElem   -> top
-            startPointer.position = 'bottom';
-            endPointer.position = 'top';
-            startPointer.style.left = "".concat(startElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2, "px");
-            startPointer.style.top = "".concat(startElement.getBoundingClientRect().height, "px");
-            endPointer.style.left = "".concat(endElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2, "px");
-            endPointer.style.top = "".concat(-this.options.pointerSize, "px");
-            break;
-
-          case StartPositionEnum.verticalLeftBottom:
-          case StartPositionEnum.verticalRightBottom:
-            // startElem -> top
-            // endElem   -> bottom
-            startPointer.position = 'top';
-            endPointer.position = 'bottom';
-            startPointer.style.left = "".concat(startElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2, "px");
-            startPointer.style.top = "-".concat(this.options.pointerSize, "px");
-            endPointer.style.left = "".concat(endElement.getBoundingClientRect().width / 2 - this.options.pointerSize / 2, "px");
-            endPointer.style.top = "".concat(endElement.getBoundingClientRect().height, "px");
-            break;
-        }
-
+        startPointer.style.left = startLeft;
+        startPointer.style.top = startTop;
+        endPointer.style.left = endLeft;
+        endPointer.style.top = entTop;
         startElement.appendChild(startPointer);
         endElement.appendChild(endPointer);
         return {
@@ -598,53 +688,9 @@
 
     }, {
       key: "createSvgArea",
-      value: function createSvgArea() {
-        var svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svgElement.innerHTML = "\n    <defs>\n      <marker id=\"markerEndArrow\" viewBox=\"0 0 30 30\" refX=\"9\" refY=\"3\"  markerUnits=\"strokeWidth\" markerWidth=\"30\" markerHeight=\"30\" orient=\"auto\">\n        <path style=\"fill:".concat(this.options.color, ";opacity:1\" d=\"M0,0 0,6 9,3z\" />\n      </marker>\n    </defs>"); // set svg position
-        // use position attribute to handle with ethe position
+      value: function createSvgArea$1() {
+        var svgElement = createSvgArea(this.startPosition, this.startPointer, this.endPointer, this.options);
 
-        svgElement.style.position = 'absolute';
-        svgElement.style.zIndex = '999';
-        svgElement.style.overflow = 'visible';
-
-        var _this$getTotalOffset = this.getTotalOffset(this.startPointer),
-            startOffsetLeft = _this$getTotalOffset.offsetLeft,
-            startOffsetTop = _this$getTotalOffset.offsetTop;
-
-        var _this$getTotalOffset2 = this.getTotalOffset(this.endPointer),
-            endOffsetLeft = _this$getTotalOffset2.offsetLeft,
-            endOffsetTop = _this$getTotalOffset2.offsetTop;
-
-        switch (this.startPosition) {
-          case StartPositionEnum.horizontalLeftTop:
-          case StartPositionEnum.verticalLeftTop:
-            svgElement.style.left = "".concat(startOffsetLeft, "px");
-            svgElement.style.top = "".concat(startOffsetTop, "px");
-            break;
-
-          case StartPositionEnum.horizontalRightTop:
-          case StartPositionEnum.verticalRightTop:
-            svgElement.style.left = "".concat(endOffsetLeft, "px");
-            svgElement.style.top = "".concat(startOffsetTop, "px");
-            break;
-
-          case StartPositionEnum.horizontalLeftBottom:
-          case StartPositionEnum.verticalLeftBottom:
-            svgElement.style.left = "".concat(startOffsetLeft, "px");
-            svgElement.style.top = "".concat(endOffsetTop, "px");
-            break;
-
-          case StartPositionEnum.horizontalRightBottom:
-          case StartPositionEnum.verticalRightBottom:
-            svgElement.style.left = "".concat(endOffsetLeft, "px");
-            svgElement.style.top = "".concat(endOffsetTop, "px");
-            break;
-        }
-
-        var width = Math.abs(startOffsetLeft - endOffsetLeft) + this.options.pointerSize;
-        var height = Math.abs(startOffsetTop - endOffsetTop) + this.options.pointerSize;
-        svgElement.setAttribute('width', "".concat(width, "px"));
-        svgElement.setAttribute('height', "".concat(height, "px"));
         var svgWidth = svgElement.width.baseVal.valueInSpecifiedUnits;
         var svgHeight = svgElement.height.baseVal.valueInSpecifiedUnits;
         this.svgParameters = {
@@ -1149,7 +1195,11 @@
       this.playground = playground;
       this.options = _objectSpread2({
         color: '#cccccc',
-        hoverColor: 'red'
+        hoverColor: 'red',
+        pointerPosition: 'auto',
+        pointerSize: 4,
+        strokeWidth: 1,
+        arrowSize: 15
       }, options); // set the playground to position relative
       // init the connections
 
@@ -1184,7 +1234,7 @@
       try {
         for (var _iterator2 = connections[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
           var con = _step2.value;
-          var connectionInstance = new TYPE_MAP$1[options.type](playground, con.start, con.end, options);
+          var connectionInstance = new TYPE_MAP$1[options.type](playground, con.start, con.end, this.options);
           this.elementConnectionsMap[con.start.id].push(connectionInstance);
           this.elementConnectionsMap[con.end.id].push(connectionInstance);
           this.connections.push(connectionInstance);
@@ -1212,7 +1262,7 @@
         var _loop = function _loop() {
           var elem = _step3.value;
 
-          _this.connectableElements.push(new Connectable(playground, elem, _objectSpread2({}, options, {
+          _this.connectableElements.push(new Connectable(playground, elem, _objectSpread2({}, _this.options, {
             onDragging: function onDragging() {
               // all lines connected to this element should be reRendered
               _this.elementConnectionsMap[elem.id].forEach(function (i) {
