@@ -4,11 +4,13 @@ import { prefixCls } from './constraints';
 import { ConnectorBase } from './connector-base';
 import { ConnectorFlowchart } from './connector-flowchart';
 import { addClassIfNotExist, ifOverlapping, removeClass, setStyle } from './utils';
+import { ConnectorBezier } from './connector-bezier';
 
 const TYPE_MAP = {
   undefined: ConnectorBase,
   straight: ConnectorBase,
   flowchart: ConnectorFlowchart,
+  bezier: ConnectorBezier,
 };
 
 export class Connectable extends Draggable {

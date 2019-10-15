@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bezier</title>
+    <link rel="stylesheet" href="./lib/easy-connection.css">
+    <style>
+        #zone {
+            width: 1000px;
+            height: 700px;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+        .item {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #EB8C00;
+        }
+        #start1 {
+            left: 20px;
+            top: 30px;
+        }
+        #end1 {
+            left: 300px;
+            top: 200px;
+        }
+        #point3 {
+            left: 300px;
+            top: 20px;
+        }
+        #point4 {
+            left: 100px;
+            top: 400px;
+        }
+        #point5 {
+            left: 200px;
+            top: 400px;
+        }
+        #point6 {
+            left: 300px;
+            top: 400px;
+        }
+        #point7 {
+            left: 400px;
+            top: 400px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="zone">
+    <div class="item" id="start1">s1</div>
+    <div class="item" id="end1">e1</div>
+    <div class="item" id="point3">p3</div>
+    <div class="item" id="point4">p4</div>
+    <div class="item" id="point5">p5</div>
+    <div class="item" id="point6">p6</div>
+    <div class="item" id="point7">p7</div>
+</div>
+<script src="./lib/index.js"></script>
+<script>
+  var zone = document.getElementById('zone');
+  var start1 = document.getElementById('start1');
+  var end1 = document.getElementById('end1');
+  var point3 = document.getElementById('point3');
+  var point4 = document.getElementById('point4');
+  var point5 = document.getElementById('point5');
+  var point6 = document.getElementById('point6');
+  var point7 = document.getElementById('point7');
+
+  var elements = [start1, end1, point3, point4, point5, point6, point7];
+  var connections = [
+    {start: start1, end: end1},
+  ];
+
+  var a = new EasyConnection.EasyConnection(zone, elements, connections, {
+    type: 'bezier',
+    color: '#ccc',
+    hoverColor: 'red',
+    strokeWidth: 2,
+  });
+</script>
+</body>
+</html>

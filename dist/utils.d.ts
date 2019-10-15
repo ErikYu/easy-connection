@@ -10,6 +10,8 @@ interface PolylineEvents {
 declare type svgElement = 'path' | 'polyline';
 export declare function createSvgElement(label: svgElement, styleMap: IndexedObject): SVGPathElement | SVGPolylineElement;
 export declare function createPolyline(options: ConnectorOptions, { onmouseenter, onmouseleave, onmousedown }: PolylineEvents): SVGPolylineElement;
+export declare function createPath(options: ConnectorOptions, { onmouseenter, onmouseleave, onmousedown }: PolylineEvents): SVGPathElement;
+export declare function bezierPath(path: SVGPathElement, start: number[], mid: number[], end: number[]): void;
 export declare function straightPolyline(polyLine: SVGPolylineElement, start: number[], end: number[]): void;
 export declare function stateMachinePolyLine(polyLine: SVGPolylineElement, start: number[], midA: number[], midB: number[], end: number[]): void;
 export declare function px2num(pxVal: string): number;

@@ -2,6 +2,7 @@ import { DomConnection, EasyConnectionOptions } from './connector.model';
 import { ConnectorBase } from './connector-base';
 import { Connectable } from './connectable';
 import { ConnectorFlowchart } from './connector-flowchart';
+import { ConnectorBezier } from './connector-bezier';
 import { ifOverlapping } from './utils';
 
 interface ElementConnectionsMap {
@@ -12,6 +13,7 @@ const TYPE_MAP = {
   undefined: ConnectorBase,
   straight: ConnectorBase,
   flowchart: ConnectorFlowchart,
+  bezier: ConnectorBezier,
 };
 
 export class EasyConnection {
