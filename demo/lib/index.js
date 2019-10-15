@@ -192,6 +192,22 @@
     polyline.onmousedown = onmousedown;
     return polyline;
   }
+  function createPath(options, _ref2) {
+    var onmouseenter = _ref2.onmouseenter,
+        onmouseleave = _ref2.onmouseleave,
+        onmousedown = _ref2.onmousedown;
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttributeNS(null, 'fill', 'none');
+    path.setAttributeNS(null, 'stroke', "".concat(options.color));
+    path.setAttributeNS(null, 'stroke-width', "".concat(options.strokeWidth));
+    path.onmouseenter = onmouseenter;
+    path.onmouseleave = onmouseleave;
+    path.onmousedown = onmousedown;
+    return path;
+  }
+  function bezierPath(path, start, mid, end) {
+    path.setAttributeNS(null, 'd', "\n  M".concat(start[0], " ").concat(start[1], "\n  Q").concat(mid[0], " ").concat(mid[1], "\n  ").concat(end[0], " ").concat(end[1], "\n  "));
+  }
   function straightPolyline(polyLine, start, end) {
     polyLine.setAttributeNS(null, 'points', "".concat(start.toString(), " ").concat(end.toString()));
   }
@@ -902,10 +918,82 @@
     return ConnectorFlowchart;
   }(Connector);
 
+  var ConnectorBezier =
+  /*#__PURE__*/
+  function (_Connector) {
+    _inherits(ConnectorBezier, _Connector);
+
+    function ConnectorBezier() {
+      _classCallCheck(this, ConnectorBezier);
+
+      return _possibleConstructorReturn(this, _getPrototypeOf(ConnectorBezier).apply(this, arguments));
+    }
+
+    _createClass(ConnectorBezier, [{
+      key: "drawPath",
+      value: function drawPath() {
+        var svgWidth = this.svgElement.width.baseVal.valueInSpecifiedUnits;
+        var svgHeight = this.svgElement.height.baseVal.valueInSpecifiedUnits;
+        var startCoordinate;
+        var endCoordinate;
+        var middleCoordinate;
+
+        switch (this.startPosition) {
+          case StartPositionEnum.horizontalLeftTop:
+            middleCoordinate = [svgWidth / 2 + 10, svgHeight / 2 - 10];
+            startCoordinate = this.svgParameters.leftTop;
+            endCoordinate = this.svgParameters.rightBottom;
+            break;
+
+          case StartPositionEnum.verticalLeftTop:
+            middleCoordinate = [svgWidth / 2 - 10, svgHeight / 2 + 10];
+            startCoordinate = this.svgParameters.leftTop;
+            endCoordinate = this.svgParameters.rightBottom;
+            break;
+
+          case StartPositionEnum.horizontalLeftBottom:
+          case StartPositionEnum.verticalLeftBottom:
+            middleCoordinate = [svgWidth / 2 - 10, svgHeight / 2 + 10];
+            startCoordinate = this.svgParameters.leftBottom;
+            endCoordinate = this.svgParameters.rightTop;
+            break;
+
+          case StartPositionEnum.horizontalRightTop:
+          case StartPositionEnum.verticalRightTop:
+            startCoordinate = this.svgParameters.rightTop;
+            endCoordinate = this.svgParameters.leftBottom;
+            middleCoordinate = [svgWidth / 2 - 10, svgHeight / 2 + 10];
+            break;
+
+          case StartPositionEnum.horizontalRightBottom:
+          case StartPositionEnum.verticalRightBottom:
+          default:
+            startCoordinate = this.svgParameters.rightBottom;
+            endCoordinate = this.svgParameters.leftTop;
+            middleCoordinate = [svgWidth / 2 - 10, svgHeight / 2 + 10];
+            break;
+        }
+
+        var path = createPath(this.options, {
+          onmouseenter: this.onmouseenter,
+          onmouseleave: this.onmouseleave,
+          onmousedown: this.onmousedown
+        });
+        bezierPath(path, startCoordinate, middleCoordinate, endCoordinate);
+        console.log(startCoordinate, endCoordinate);
+        path.style.markerEnd = 'url(#markerEndArrow)';
+        this.svgElement.appendChild(path);
+      }
+    }]);
+
+    return ConnectorBezier;
+  }(Connector);
+
   var TYPE_MAP = {
     undefined: ConnectorBase,
     straight: ConnectorBase,
-    flowchart: ConnectorFlowchart
+    flowchart: ConnectorFlowchart,
+    bezier: ConnectorBezier
   };
   var Connectable =
   /*#__PURE__*/
@@ -1038,7 +1126,8 @@
   var TYPE_MAP$1 = {
     undefined: ConnectorBase,
     straight: ConnectorBase,
-    flowchart: ConnectorFlowchart
+    flowchart: ConnectorFlowchart,
+    bezier: ConnectorBezier
   };
   var EasyConnection =
   /*#__PURE__*/
@@ -1196,8 +1285,10 @@
   }();
 
   exports.EasyConnection = EasyConnection;
+  exports.Connector = Connector;
   exports.ConnectorBase = ConnectorBase;
   exports.ConnectorFlowchart = ConnectorFlowchart;
+  exports.ConnectorBezier = ConnectorBezier;
   exports.Draggable = Draggable;
   exports.Connectable = Connectable;
 

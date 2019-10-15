@@ -34,6 +34,28 @@ export function createPolyline(
   return polyline;
 }
 
+export function createPath(
+  options: ConnectorOptions,
+  { onmouseenter, onmouseleave, onmousedown }: PolylineEvents,
+): SVGPathElement {
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttributeNS(null, 'fill', 'none');
+  path.setAttributeNS(null, 'stroke', `${options.color}`);
+  path.setAttributeNS(null, 'stroke-width', `${options.strokeWidth}`);
+  path.onmouseenter = onmouseenter;
+  path.onmouseleave = onmouseleave;
+  path.onmousedown = onmousedown;
+  return path;
+}
+
+export function bezierPath(path: SVGPathElement, start: number[], mid: number[], end: number[]) {
+  path.setAttributeNS(null, 'd', `
+  M${start[0]} ${start[1]}
+  Q${mid[0]} ${mid[1]}
+  ${end[0]} ${end[1]}
+  `);
+}
+
 export function straightPolyline(polyLine: SVGPolylineElement, start: number[], end: number[]) {
   polyLine.setAttributeNS(null, 'points', `${start.toString()} ${end.toString()}`);
 }
