@@ -50,11 +50,15 @@ export function createPath(
 }
 
 export function bezierPath(path: SVGPathElement, start: number[], mid: number[], end: number[]) {
-  path.setAttributeNS(null, 'd', `
-  M${start[0]} ${start[1]}
-  Q${mid[0]} ${mid[1]}
-  ${end[0]} ${end[1]}
-  `);
+  path.setAttributeNS(
+    null,
+    'd',
+    `
+    M${start[0]} ${start[1]}
+    Q${mid[0]} ${mid[1]}
+    ${end[0]} ${end[1]}
+  `,
+  );
 }
 
 export function straightPolyline(polyLine: SVGPolylineElement, start: number[], end: number[]) {

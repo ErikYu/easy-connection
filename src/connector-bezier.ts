@@ -46,7 +46,6 @@ export class ConnectorBezier extends Connector implements DrawPath {
       onmousedown: this.onmousedown,
     });
     bezierPath(path, startCoordinate, middleCoordinate, endCoordinate);
-    console.log(startCoordinate, endCoordinate);
     path.style.markerEnd = 'url(#markerEndArrow)';
     this.svgElement.appendChild(path);
   }
